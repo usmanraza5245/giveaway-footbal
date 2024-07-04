@@ -6,6 +6,7 @@ import {
   Circle,
   Group,
   Image as KonvaImage,
+  Text,
 } from "react-konva";
 import useImage from "use-image";
 
@@ -13,6 +14,7 @@ const App = () => {
   const [startPoint, setStartPoint] = useState(null);
   const [endPoint, setEndPoint] = useState(null);
   const [lines, setLines] = useState([]);
+  const [showLines, setShowLines] = useState(true);
   const [intersection, setIntersection] = useState(null);
   const [image] = useImage("../src/assets/test.jpg");
   const [imageDimensions, setImageDimensions] = useState({
@@ -20,6 +22,7 @@ const App = () => {
     height: 0,
   });
   const [magnifierPosition, setMagnifierPosition] = useState({ x: 0, y: 0 });
+  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     if (image) {
@@ -36,6 +39,7 @@ const App = () => {
   const handleMouseMove = (e) => {
     const pos = e.target.getStage().getPointerPosition();
     setMagnifierPosition(pos);
+    setCursorPosition(pos);
     if (startPoint) {
       setEndPoint(pos);
     }
@@ -43,20 +47,45 @@ const App = () => {
 
   const handleMouseUp = () => {
     if (startPoint && endPoint) {
-      const newLine = {
-        points: [startPoint.x, startPoint.y, endPoint.x, endPoint.y],
-      };
-      setLines([...lines, newLine]);
+      const fullLine = getFullLine(startPoint, endPoint);
+      setLines([...lines, fullLine]);
+
       if (lines.length > 0) {
         const intersect = getIntersection(
           lines[lines.length - 1].points,
-          newLine.points
+          fullLine.points
         );
         if (intersect) setIntersection(intersect);
       }
     }
     setStartPoint(null);
     setEndPoint(null);
+  };
+
+  const getFullLine = (start, end) => {
+    const { width, height } = imageDimensions;
+    const dx = end.x - start.x;
+    const dy = end.y - start.y;
+
+    let points = [start.x, start.y];
+
+    if (Math.abs(dx) > Math.abs(dy)) {
+      // Line is more horizontal
+      if (dx > 0) {
+        points.push(width, start.y + ((width - start.x) * dy) / dx);
+      } else {
+        points.push(0, start.y + ((0 - start.x) * dy) / dx);
+      }
+    } else {
+      // Line is more vertical
+      if (dy > 0) {
+        points.push(start.x + ((height - start.y) * dx) / dy, height);
+      } else {
+        points.push(start.x + ((0 - start.y) * dx) / dy, 0);
+      }
+    }
+
+    return { points };
   };
 
   const getIntersection = (line1, line2) => {
@@ -76,7 +105,7 @@ const App = () => {
     return { x: intersectX, y: intersectY };
   };
 
-  const magnifierSize = 50;
+  const magnifierSize = 80;
   const magnifierScale = 8;
 
   return (
@@ -88,6 +117,56 @@ const App = () => {
         height: "100vh",
       }}
     >
+      <div className="flex flex-col" style={{ marginRight: "20px" }}>
+        <button
+          style={{
+            padding: "10px",
+            marginBottom: "10px",
+            backgroundColor: "#4CAF50",
+            color: "white",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+          }}
+          onClick={() => {
+            setLines(lines.slice(0, -1));
+            setIntersection(null);
+          }}
+        >
+          Undo
+        </button>
+        <button
+          style={{
+            padding: "10px",
+            marginBottom: "10px",
+            backgroundColor: "#008CBA",
+            color: "white",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+          }}
+          onClick={() => setShowLines(!showLines)}
+        >
+          {showLines ? "Hide Lines" : "Show Lines"}
+        </button>
+        <button
+          style={{
+            padding: "10px",
+            marginBottom: "10px",
+            backgroundColor: "#f44336",
+            color: "white",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+          }}
+          onClick={() => {
+            setLines([]);
+            setIntersection(null);
+          }}
+        >
+          Clear Lines
+        </button>
+      </div>
       {image && (
         <Stage
           width={imageDimensions.width}
@@ -108,19 +187,20 @@ const App = () => {
                 width={imageDimensions.width}
                 height={imageDimensions.height}
               />
-              {lines.map((line, i) => (
-                <Line
-                  key={i}
-                  points={line.points}
-                  stroke="black"
-                  strokeWidth={1}
-                  lineCap="round"
-                  lineJoin="round"
-                />
-              ))}
+              {showLines &&
+                lines.map((line, i) => (
+                  <Line
+                    key={i}
+                    points={line.points}
+                    stroke="black"
+                    strokeWidth={1}
+                    lineCap="round"
+                    lineJoin="round"
+                  />
+                ))}
               {startPoint && endPoint && (
                 <Line
-                  points={[startPoint.x, startPoint.y, endPoint.x, endPoint.y]}
+                  points={getFullLine(startPoint, endPoint).points}
                   stroke="red"
                   strokeWidth={2}
                   lineCap="round"
@@ -132,7 +212,7 @@ const App = () => {
                 <Circle
                   x={intersection.x}
                   y={intersection.y}
-                  radius={5}
+                  radius={3}
                   fill="blue"
                 />
               )}
@@ -153,13 +233,61 @@ const App = () => {
               >
                 <KonvaImage
                   image={image}
-                  x={-magnifierPosition.x * magnifierScale + magnifierSize / 2}
-                  y={-magnifierPosition.y * magnifierScale + magnifierSize / 2}
+                  x={
+                    -magnifierPosition.x * magnifierScale + magnifierSize / 2
+                  }
+                  y={
+                    -magnifierPosition.y * magnifierScale + magnifierSize / 2
+                  }
                   width={imageDimensions.width * magnifierScale}
                   height={imageDimensions.height * magnifierScale}
                 />
+                {showLines &&
+                  lines.map((line, i) => (
+                    <Line
+                      key={i}
+                      points={line.points.map(
+                        (p, idx) =>
+                          (p -
+                            (idx % 2 === 0
+                              ? magnifierPosition.x
+                              : magnifierPosition.y)) *
+                            magnifierScale +
+                          magnifierSize / 2
+                      )}
+                      stroke="black"
+                      strokeWidth={1}
+                      lineCap="round"
+                      lineJoin="round"
+                    />
+                  ))}
+                {intersection && (
+                  <Circle
+                    x={
+                      (intersection.x - magnifierPosition.x) *
+                        magnifierScale +
+                      magnifierSize / 2
+                    }
+                    y={
+                      (intersection.y - magnifierPosition.y) *
+                        magnifierScale +
+                      magnifierSize / 2
+                    }
+                    radius={3 * magnifierScale}
+                    fill="blue"
+                  />
+                )}
               </Group>
             )}
+            <Text
+              x={cursorPosition.x - 40}
+              y={cursorPosition.y + 45}
+              text={`x: ${Math.floor(cursorPosition.x)}, y: ${Math.floor(
+                cursorPosition.y
+              )}`}
+              fontSize={14}
+              fill="white"
+            />
           </Layer>
         </Stage>
       )}
