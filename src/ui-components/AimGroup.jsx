@@ -1,5 +1,7 @@
 import React from "react";
 import { Layer, Line, Group, Text, Image as KonvaImage } from "react-konva";
+import { useContext } from "react";
+import { GameContext } from "../context/Context";
 
 const AimGroup = ({
   imageDimensions,
@@ -9,6 +11,7 @@ const AimGroup = ({
   image,
   lines
 }) => {
+  const {showLines} = useContext(GameContext)
   return (
     <Group
       clipFunc={(ctx) =>
@@ -20,7 +23,7 @@ const AimGroup = ({
         width={imageDimensions.width}
         height={imageDimensions.height}
       />
-      {lines.map((line, i) => (
+      { showLines && lines.map((line, i) => (
         <Line
           key={i}
           points={line.points}

@@ -1,6 +1,13 @@
 import React, { useState, useRef } from "react";
 import { Stage, Layer, Text, Shape, Circle, Rect } from "react-konva";
 
+import { FaPen } from "react-icons/fa";
+import { IoMdUndo } from "react-icons/io";
+import { MdClearAll } from "react-icons/md";
+
+import { useContext } from "react";
+import { GameContext } from "../context/Context";
+
 const SpotBallTools = () => {
   const stageRef = useRef(null);
   const [tooltip, setTooltip] = useState({
@@ -28,6 +35,17 @@ const SpotBallTools = () => {
     });
   };
 
+  const { lines, setLines, showLines, setShowLines } = useContext(GameContext);
+
+  const handleShowLines = () => {setShowLines(!showLines)};
+  const handleUndo = () => {
+    setLines(lines.slice(0, -1));
+  };
+
+  const handleClear = () => {
+    setLines([]);
+  };
+
   return (
     <div
       style={{
@@ -36,71 +54,26 @@ const SpotBallTools = () => {
         alignItems: "flex-start",
       }}
     >
-      <Stage width={75} height={230} ref={stageRef}>
-        <Layer>
-          <Rect
-            x={0}
-            y={0}
-            width={75}
-            height={230}
-            fill="#CACACF"
-            cornerRadius={[10, 0, 0, 5]}
-          />
-        </Layer>
-        <Layer>
-          {[35, 75, 115, 155, 195].map((y, i) => (
-            <Circle
-              key={i}
-              x={35}
-              y={y}
-              radius={18}
-              stroke="black"
-              strokeWidth={1}
-              onMouseMove={(e) => handleMouseIn(e, "Draw Lines")}
-              onMouseOut={handleMouseOut}
-            />
-          ))}
-        </Layer>
-        <Layer>
-          {tooltip.visible && (
-            <>
-              <Rect
-                x={tooltip.x - 35}
-                y={tooltip.y + 10}
-                width={tooltip.text.length * 6}
-                height={20}
-                fill="white"
-                shadowBlur={2}
-                cornerRadius={4}
-              />
-              <Text
-                text={tooltip.text}
-                x={tooltip.x - 35}
-                y={tooltip.y + 10}
-                fontFamily="Calibri"
-                fontSize={12}
-                padding={5}
-                fill="black"
-              />
-            </>
-          )}
-        </Layer>
-      </Stage>
-      <Stage width={75} height={250}>
-        <Layer>
-          <Shape
-            style={{ width: "75px" }}
-            sceneFunc={(context, shape) => {
-              context.moveTo(2, 0);
-              context.lineTo(75, 0);
-              context.lineTo(90, 100);
-              context.closePath();
-              context.fillStrokeShape(shape);
-            }}
-            fill="#CACACF"
-          />
-        </Layer>
-      </Stage>
+      <div>
+        <div
+          onClick={handleShowLines}
+          className="border border-black rounded-[50%] mb-[10px]"
+        >
+          <FaPen size={20} className="m-[15px]" />
+        </div>
+        <div
+          onClick={handleUndo}
+          className="border border-black rounded-[50%] mb-[10px]"
+        >
+          <IoMdUndo size={20} className="m-[15px]" />
+        </div>
+        <div
+          onClick={handleClear}
+          className="border border-black rounded-[50%]"
+        >
+          <MdClearAll size={20} className="m-[15px]" />
+        </div>
+      </div>
     </div>
   );
 };

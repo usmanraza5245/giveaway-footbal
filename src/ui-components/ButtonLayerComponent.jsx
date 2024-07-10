@@ -1,12 +1,10 @@
 import React from "react";
-import { useHistory } from "react-router-dom";
 import { Layer, Text, Rect } from "react-konva";
 
 const ButtonLayerComponent = ({plusClick}) => {
-  const history = useHistory();
 
   const handleButtonClick = () => {
-    history.push("/Result");
+    // history.push("/Result");
   };
 
   return (

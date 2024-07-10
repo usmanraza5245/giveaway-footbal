@@ -7,7 +7,7 @@ import SpotBallContainer from "./ui-components/SpotBallContainer";
 
 const Page1 = () => {
   const [tool, setTool] = useState("pen");
-
+ 
   return (
     <div
       style={{

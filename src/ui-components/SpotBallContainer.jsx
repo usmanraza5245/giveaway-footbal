@@ -4,10 +4,15 @@ import useImage from "use-image";
 import ButtonLayerComponent from "./ButtonLayerComponent";
 import LinesLayer from "./LinesLayer";
 
+import { useContext } from "react";
+import { GameContext } from "../context/Context";
+
 const SpotBallContainer = ({ tool }) => {
+
+  const {lines , setLines , showLines} = useContext(GameContext);
   const [startPoint, setStartPoint] = useState(null);
   const [endPoint, setEndPoint] = useState(null);
-  const [lines, setLines] = useState([]);
+  console.log('lines: ', lines);
   const [image] = useImage("test.jpg");
   const [imageDimensions, setImageDimensions] = useState({
     width: 0,
