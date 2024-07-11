@@ -1,12 +1,10 @@
 import React, { useState, useRef } from "react";
-import { Stage, Layer, Text, Shape, Circle, Rect } from "react-konva";
-
-import { FaPen } from "react-icons/fa";
 import { IoMdUndo } from "react-icons/io";
 import { MdClearAll } from "react-icons/md";
-
+import { IoEye } from "react-icons/io5";
+import { IoEyeOff } from "react-icons/io5";
 import { useContext } from "react";
-import { GameContext } from "../context/Context";
+import { GameContext } from "../../context/Context";
 
 const SpotBallTools = () => {
   const stageRef = useRef(null);
@@ -37,7 +35,9 @@ const SpotBallTools = () => {
 
   const { lines, setLines, showLines, setShowLines } = useContext(GameContext);
 
-  const handleShowLines = () => {setShowLines(!showLines)};
+  const handleShowLines = () => {
+    setShowLines(!showLines);
+  };
   const handleUndo = () => {
     setLines(lines.slice(0, -1));
   };
@@ -47,33 +47,52 @@ const SpotBallTools = () => {
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "flex-start",
-      }}
-    >
-      <div>
+    <div>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#CACACF",
+          zindex: -1,
+          height: "200px",
+          width: "80px",
+          borderRadius: "10px 0 0 0",
+        }}
+      >
         <div
           onClick={handleShowLines}
-          className="border border-black rounded-[50%] mb-[10px]"
+          className="border border-black rounded-[50%] mb-[10px] cursor-pointer"
         >
-          <FaPen size={20} className="m-[15px]" />
+          {showLines ? (
+            <IoEyeOff size={20} className="m-[15px]" />
+          ) : (
+            <IoEye size={20} className="m-[15px]" />
+          )}
         </div>
         <div
           onClick={handleUndo}
-          className="border border-black rounded-[50%] mb-[10px]"
+          className="border border-black rounded-[50%] mb-[10px] cursor-pointer"
         >
           <IoMdUndo size={20} className="m-[15px]" />
         </div>
         <div
           onClick={handleClear}
-          className="border border-black rounded-[50%]"
+          className="border border-black rounded-[50%] cursor-pointer"
         >
           <MdClearAll size={20} className="m-[15px]" />
         </div>
       </div>
+      <div
+        style={{
+          width: 0,
+          height: 0,
+          borderBottom: "60px solid transparent",
+          borderRight: "80px solid #CACACF",
+          borderRadius: "0 0 0 10px",
+        }}
+      ></div>
     </div>
   );
 };

@@ -1,6 +1,5 @@
 import React from "react";
-import Practice from "./Practice.jsx";
-
+import Practice from "./pages/Practice.jsx";
 import Context from "./context/Context.jsx";
 
 const App = () => {

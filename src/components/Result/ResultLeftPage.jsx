@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Stage, Layer } from "react-konva";
 import useImage from "use-image";
-import CustomKonvaImage from "./CustomKonvaImage";
+import CustomKonvaImage from "../../UI/CustomKonvaImage";
 
 const ResultLeftPage = () => {
   const [image] = useImage("test.jpg");

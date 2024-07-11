@@ -1,13 +1,11 @@
 import React, { useState } from "react";
-
-// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import SpotBallTools from "./ui-components/SpotBallTools";
-import SpotBallInfo from "./ui-components/SpotBallInfo";
-import SpotBallContainer from "./ui-components/SpotBallContainer";
+import SpotBallTools from "../components/Practice/SpotBallTools";
+import SpotBallInfo from "../components/Practice/SpotBallInfo";
+import SpotBallContainer from "../components/Practice/SpotBallContainer";
 
 const Page1 = () => {
   const [tool, setTool] = useState("pen");
- 
+
   return (
     <div
       style={{

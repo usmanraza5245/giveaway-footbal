@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
-import ResultRightPage from "./ui-components/ResultRightPage";
-import ResultLeftPage from "./ui-components/ResultLeftPage";
+import ResultRightPage from "../UI/ResultRightPage";
+import ResultLeftPage from "../components/Result/ResultLeftPage";
 
-const Page2 = () => {
-
+const Result = () => {
   // Mobile Responsiveness
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
@@ -18,7 +17,6 @@ const Page2 = () => {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
-
 
   return (
     <div
@@ -35,4 +33,4 @@ const Page2 = () => {
   );
 };
 
-export default Page2;
+export default Result;

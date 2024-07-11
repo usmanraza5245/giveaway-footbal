@@ -1,7 +1,7 @@
 import React from "react";
 import ButtonComponent from "./ButtonComponent";
 import ZoneComponent from "./ZoneComponent";
-import CoordinatesComponent from "./CordinatesComponent";
+import CoordinatesComponent from "../../UI/CordinatesComponent";
 import HeadingComponent from "./HeadingComponent";
 const ResultRightPage = () => {
   return (

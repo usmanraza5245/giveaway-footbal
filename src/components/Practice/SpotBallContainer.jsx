@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { Stage } from "react-konva";
 import useImage from "use-image";
-import ButtonLayerComponent from "./ButtonLayerComponent";
+import ButtonLayerComponent from "../Result/ButtonLayerComponent";
 import LinesLayer from "./LinesLayer";
 
 import { useContext } from "react";
-import { GameContext } from "../context/Context";
+import { GameContext } from "../../context/Context";
 
 const SpotBallContainer = ({ tool }) => {
-
-  const {lines , setLines , showLines} = useContext(GameContext);
+  const { lines, setLines } = useContext(GameContext);
   const [startPoint, setStartPoint] = useState(null);
   const [endPoint, setEndPoint] = useState(null);
-  console.log('lines: ', lines);
+  console.log("lines: ", lines);
   const [image] = useImage("test.jpg");
   const [imageDimensions, setImageDimensions] = useState({
     width: 0,
@@ -31,7 +30,7 @@ const SpotBallContainer = ({ tool }) => {
     }
   }, [image]);
 
-  const [plusClick, setPlusClick] = useState(0); // Initial value set to 0
+  const [plusClick, setPlusClick] = useState(0);
 
   console.log(plusClick);
   const handleMouseDown = (e) => {
