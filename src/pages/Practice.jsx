@@ -25,7 +25,6 @@ const Page1 = () => {
         <option value="pen">Pen</option>
         <option value="plus">Plus</option>
       </select>
-
       <div
         style={{
           marginTop: "5vh",

@@ -4,6 +4,7 @@ export const GameContext = createContext({});
 const Context = ({ children }) => {
   const [lines, setLines] = useState([]);
   const [showLines, setShowLines] = useState(true);
+
   return (
     <GameContext.Provider value={{ lines, setLines, showLines, setShowLines }}>
       {children}
