@@ -46,7 +46,7 @@ const SpotBallTools = () => {
 
   return (
     <div>
-      <div className="bg-[#F4F4F4] flex flex-col justify-start items-center z-[-1] h-[97%] w-[80px] rounded-l-[10px]">
+      <div className="bg-[#F4F4F4] flex flex-col justify-start items-center z-[-1] h-[500px] w-[80px] rounded-l-[10px]">
         <div
           onClick={handleUndo}
           className="bg-[#FF9900] border border-black rounded-[50%] mt-[30px] mb-[5px] cursor-pointer"

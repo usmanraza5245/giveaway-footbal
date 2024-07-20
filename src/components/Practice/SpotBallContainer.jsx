@@ -38,7 +38,7 @@ const SpotBallContainer = ({ tool }) => {
 
   useEffect(() => {
     if (image) {
-      setImageDimensions({ width: 638, height: 620 });
+      setImageDimensions({ width: 500, height: 500});
     }
   }, [image]);
 
@@ -66,8 +66,8 @@ const SpotBallContainer = ({ tool }) => {
     if (startPoint) {
       const angle = Math.atan2(pos.y - startPoint.y, pos.x - startPoint.x);
       const newEndPoint = {
-        x: startPoint.x + 800 * Math.cos(angle),
-        y: startPoint.y + 800 * Math.sin(angle),
+        x: startPoint.x + 500 * Math.cos(angle),
+        y: startPoint.y + 500 * Math.sin(angle),
       };
       setEndPoint(newEndPoint);
     }

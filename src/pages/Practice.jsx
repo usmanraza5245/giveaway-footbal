@@ -41,7 +41,7 @@ const Page1 = () => {
         {/* Middle One */}
         <SpotBallContainer tool={tool} />
         {/* Right One */}
-        <SpotBallInfo />
+        {/* <SpotBallInfo /> */}
       </div>
     </div>
   );
