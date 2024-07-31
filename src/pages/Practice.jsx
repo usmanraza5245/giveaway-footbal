@@ -4,7 +4,7 @@ import SpotBallInfo from "../components/Practice/SpotBallInfo";
 import SpotBallContainer from "../components/Practice/SpotBallContainer";
 
 const Page1 = () => {
-  const [tool, setTool] = useState("pen");
+ 
 
   return (
     <div
@@ -15,16 +15,7 @@ const Page1 = () => {
         justifyContent: "center",
       }}
     >
-      {/* Remove Select tag in future  */}
-      <select
-        value={tool}
-        onChange={(e) => {
-          setTool(e.target.value);
-        }}
-      >
-        <option value="pen">Pen</option>
-        <option value="plus">Plus</option>
-      </select>
+     
       <div
         style={{
           marginTop: "5vh",
@@ -37,7 +28,7 @@ const Page1 = () => {
         }}
       >
         <SpotBallTools />
-        <SpotBallContainer tool={tool} />
+        <SpotBallContainer />
       </div>
     </div>
   );

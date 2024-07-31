@@ -4,9 +4,12 @@ export const GameContext = createContext({});
 const Context = ({ children }) => {
   const [lines, setLines] = useState([]);
   const [showLines, setShowLines] = useState(true);
+  const [tool, setTool] = useState({pen : true});
 
   return (
-    <GameContext.Provider value={{ lines, setLines, showLines, setShowLines }}>
+    <GameContext.Provider
+      value={{ lines, setLines, showLines, setShowLines, tool, setTool }}
+    >
       {children}
     </GameContext.Provider>
   );

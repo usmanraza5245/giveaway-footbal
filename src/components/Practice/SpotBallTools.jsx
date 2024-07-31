@@ -3,6 +3,8 @@ import { useContext } from "react";
 import { GameContext } from "../../context/Context";
 import { MdOutlineReplay } from "react-icons/md";
 import { RxCross2 } from "react-icons/rx";
+import { FaPen } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
 
 const SpotBallTools = () => {
   const stageRef = useRef(null);
@@ -31,7 +33,8 @@ const SpotBallTools = () => {
     });
   };
 
-  const { lines, setLines, showLines, setShowLines } = useContext(GameContext);
+  const { lines, setLines, showLines, setShowLines, tool, setTool } =
+    useContext(GameContext);
 
   const handleShowLines = () => {
     setShowLines(!showLines);
@@ -44,12 +47,28 @@ const SpotBallTools = () => {
     setLines([]);
   };
 
+  const handleTool = () => {
+    setTool((prev) => ({ ...prev, pen: !prev.pen }));
+  };
+
   return (
     <div>
       <div className="bg-[#F4F4F4] flex flex-col justify-start items-center z-[-1] h-[500px] w-[80px] rounded-l-[10px]">
         <div
+          onClick={handleTool}
+          className="bg-[#05FF00] border border-black rounded-[50%] mt-[30px] mb-[5px] cursor-pointer"
+        >
+          {!tool.pen ? (
+            <FaPen size={20} className="m-[10px] text-white" />
+          ) : (
+            <FaPlus size={20} className="m-[10px] text-white" />
+          )}
+        </div>
+
+        <p>{!tool.pen ? "Pen" : "Plus"}</p>
+        <div
           onClick={handleUndo}
-          className="bg-[#FF9900] border border-black rounded-[50%] mt-[30px] mb-[5px] cursor-pointer"
+          className="bg-[#FF9900] border border-black rounded-[50%] mt-[10px] mb-[5px] cursor-pointer"
         >
           <MdOutlineReplay size={30} className="m-[5px] text-white" />
         </div>

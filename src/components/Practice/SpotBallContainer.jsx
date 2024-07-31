@@ -13,8 +13,9 @@ import useImage from "use-image";
 import { GameContext } from "../../context/Context";
 import { getIntersection } from "../../utils/practice";
 
-const SpotBallContainer = ({ tool }) => {
-  const { lines, setLines, showLines } = useContext(GameContext);
+const SpotBallContainer = () => {
+  const { lines, setLines, showLines ,tool} = useContext(GameContext);
+  console.log('tool: ', tool);
   const [startPoint, setStartPoint] = useState(null);
   const [endPoint, setEndPoint] = useState(null);
   const [intersection, setIntersection] = useState(null);
@@ -43,10 +44,10 @@ const SpotBallContainer = ({ tool }) => {
 
   const handleMouseDown = (e) => {
     const pos = e.target.getStage().getPointerPosition();
-    if (tool === "pen") {
+    if (tool.pen === true) {
       setStartPoint(pos);
       setEndPoint(pos);
-    } else if (tool === "plus") {
+    } else if (tool.pen === false) {
       setPlusSigns([...plusSigns, pos]);
       localStorage.setItem(`x_${plusSigns.length}`, pos.x);
       localStorage.setItem(`y_${plusSigns.length}`, pos.y);
