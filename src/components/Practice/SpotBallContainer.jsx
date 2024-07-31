@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Stage,
   Layer,
@@ -10,7 +10,6 @@ import {
   Text,
 } from "react-konva";
 import useImage from "use-image";
-import { useContext } from "react";
 import { GameContext } from "../../context/Context";
 import { getIntersection } from "../../utils/practice";
 
@@ -26,7 +25,7 @@ const SpotBallContainer = ({ tool }) => {
   });
   const [magnifierPosition, setMagnifierPosition] = useState({ x: 0, y: 0 });
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
-  const [plusSign, setPlusSign] = useState(null);
+  const [plusSigns, setPlusSigns] = useState([]);
 
   const scalePoints = (points) =>
     points.map(
@@ -38,23 +37,20 @@ const SpotBallContainer = ({ tool }) => {
 
   useEffect(() => {
     if (image) {
-      setImageDimensions({ width: 500, height: 500});
+      setImageDimensions({ width: 500, height: 500 });
     }
   }, [image]);
 
   const handleMouseDown = (e) => {
     const pos = e.target.getStage().getPointerPosition();
-    const pos2 = e.target.getStage().getPointerPosition();
-
     if (tool === "pen") {
       setStartPoint(pos);
       setEndPoint(pos);
-    } else if (tool === "plus" && plusClick === 0) {
-      setPlusSign(pos2);
-      localStorage.setItem("x", pos2.x);
-      localStorage.setItem("y", pos2.y);
-      console.log("Plus sign coordinates:", pos2);
-      setPlusClick(1);
+    } else if (tool === "plus") {
+      setPlusSigns([...plusSigns, pos]);
+      localStorage.setItem(`x_${plusSigns.length}`, pos.x);
+      localStorage.setItem(`y_${plusSigns.length}`, pos.y);
+      console.log("Plus sign coordinates:", pos);
     }
   };
 
@@ -171,6 +167,22 @@ const SpotBallContainer = ({ tool }) => {
                   fill="blue"
                 />
               )}
+              {plusSigns.map((plusSign, index) => (
+                <Group key={index}>
+                  <Line
+                    points={[plusSign.x - 15, plusSign.y, plusSign.x + 15, plusSign.y]}
+                    stroke="blue"
+                    strokeWidth={2}
+                    lineCap="round"
+                  />
+                  <Line
+                    points={[plusSign.x, plusSign.y - 15, plusSign.x, plusSign.y + 15]}
+                    stroke="blue"
+                    strokeWidth={2}
+                    lineCap="round"
+                  />
+                </Group>
+              ))}
             </Group>
 
             {/* Magnifier Group  */}
@@ -228,8 +240,8 @@ const SpotBallContainer = ({ tool }) => {
                     lineJoin="round"
                   />
                 )}
-                {plusSign && (
-                  <>
+                {plusSigns.map((plusSign, index) => (
+                  <Group key={index}>
                     <Line
                       points={scalePoints([
                         plusSign.x - 15,
@@ -252,8 +264,8 @@ const SpotBallContainer = ({ tool }) => {
                       strokeWidth={2 * magnifierScale}
                       lineCap="round"
                     />
-                  </>
-                )}
+                  </Group>
+                ))}
                 {intersection && (
                   <Circle
                     x={

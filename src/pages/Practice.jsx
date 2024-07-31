@@ -36,12 +36,8 @@ const Page1 = () => {
           minHeight: "638px",
         }}
       >
-        {/* Left Side */}
         <SpotBallTools />
-        {/* Middle One */}
         <SpotBallContainer tool={tool} />
-        {/* Right One */}
-        {/* <SpotBallInfo /> */}
       </div>
     </div>
   );
