@@ -51,6 +51,10 @@ const SpotBallTools = () => {
     setTool((prev) => ({ ...prev, pen: !prev.pen }));
   };
 
+  const handleTest = () => {
+    window.parent.postMessage("hi", '*');
+  };
+
   return (
     <div>
       <div className="bg-[#F4F4F4] flex flex-col justify-start items-center z-[-1] h-[500px] w-[80px] rounded-l-[10px]">
@@ -64,6 +68,8 @@ const SpotBallTools = () => {
             <FaPlus size={20} className="m-[10px] text-white" />
           )}
         </div>
+
+        <button onClick={handleTest}>test button</button>
 
         <p>{!tool.pen ? "Pen" : "Plus"}</p>
         <div
