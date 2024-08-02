@@ -14,8 +14,7 @@ import { GameContext } from "../../context/Context";
 import { getIntersection } from "../../utils/practice";
 
 const SpotBallContainer = () => {
-  const { lines, setLines, showLines ,tool} = useContext(GameContext);
-  console.log('tool: ', tool);
+  const { lines, setLines, showLines, tool } = useContext(GameContext);
   const [startPoint, setStartPoint] = useState(null);
   const [endPoint, setEndPoint] = useState(null);
   const [intersection, setIntersection] = useState(null);
@@ -44,20 +43,19 @@ const SpotBallContainer = () => {
 
   const handleMouseDown = (e) => {
     const pos = e.target.getStage().getPointerPosition();
-    if (tool.pen === true) {
+    if (tool.pen) {
       setStartPoint(pos);
       setEndPoint(pos);
-    } else if (tool.pen === false) {
+    } else {
       setPlusSigns([...plusSigns, pos]);
       localStorage.setItem(`x_${plusSigns.length}`, pos.x);
       localStorage.setItem(`y_${plusSigns.length}`, pos.y);
-      console.log("Plus sign coordinates:", pos);
+      window.top.postMessage({ ticketPlayed: true }, "*");
     }
   };
 
   const handleMouseMove = (e) => {
     const pos = e.target.getStage().getPointerPosition();
-
     setMagnifierPosition(pos);
 
     if (startPoint) {
@@ -114,6 +112,30 @@ const SpotBallContainer = () => {
 
   const magnifierSize = 80;
   const magnifierScale = 5;
+
+  const getCoordinatesPosition = () => {
+    const padding = 10;
+    const { x, y } = cursorPosition;
+    const { width, height } = imageDimensions;
+
+    let xPos = x - 80; // Default position to the left
+    let yPos = y - 55; // Default position above
+
+    // Adjust position based on cursor position
+    if (x < 80) {
+      xPos = x + padding; // Move to the right if near left edge
+    } else if (x > width ) {
+      xPos = x - 160 - padding; // Move to the left if near right edge
+    }
+
+    if (y < 55) {
+      yPos = y + padding; // Move below if near top edge
+    } else if (y > height ) {
+      yPos = y - 110 - padding; // Move above if near bottom edge
+    }
+
+    return { x: xPos, y: yPos };
+  };
 
   return (
     <div>
@@ -329,8 +351,8 @@ const SpotBallContainer = () => {
             </Group>
 
             <Text
-              x={cursorPosition.x - 80}
-              y={cursorPosition.y - 55}
+              x={getCoordinatesPosition().x}
+              y={getCoordinatesPosition().y}
               text={`x: ${Math.floor(cursorPosition.x)}, y: ${Math.floor(
                 cursorPosition.y
               )}`}
@@ -346,4 +368,3 @@ const SpotBallContainer = () => {
 };
 
 export default SpotBallContainer;
-//test comment

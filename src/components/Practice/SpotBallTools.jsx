@@ -52,7 +52,7 @@ const SpotBallTools = () => {
   };
 
   const handleTest = () => {
-    window.parent.postMessage("hi", '*');
+    window.top.postMessage({ text: "hi" }, "*");
   };
 
   return (
