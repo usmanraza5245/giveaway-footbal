@@ -69,8 +69,6 @@ const SpotBallTools = () => {
           )}
         </div>
 
-        <button onClick={handleTest}>test button</button>
-
         <p>{!tool.pen ? "Pen" : "Plus"}</p>
         <div
           onClick={handleUndo}

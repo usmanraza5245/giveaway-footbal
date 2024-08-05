@@ -18,7 +18,7 @@ const SpotBallContainer = () => {
   const [startPoint, setStartPoint] = useState(null);
   const [endPoint, setEndPoint] = useState(null);
   const [intersection, setIntersection] = useState(null);
-  const [image] = useImage("test.jpg");
+  const [image] = useImage("Test Image 1.png");
   const [imageDimensions, setImageDimensions] = useState({
     width: 0,
     height: 0,
@@ -50,7 +50,7 @@ const SpotBallContainer = () => {
       setPlusSigns([...plusSigns, pos]);
       localStorage.setItem(`x_${plusSigns.length}`, pos.x);
       localStorage.setItem(`y_${plusSigns.length}`, pos.y);
-      window.top.postMessage({ ticketPlayed: true }, "*");
+      window.top.postMessage({ ticketPlayed: true , coordinates : {x: pos.x.toFixed(0), y: pos.y.toFixed(0)}}, "*");
     }
   };
 
@@ -129,7 +129,7 @@ const SpotBallContainer = () => {
     }
 
     if (y < 55) {
-      yPos = y + padding; // Move below if near top edge
+      yPos = y + padding +40; // Move below if near top edge
     } else if (y > height ) {
       yPos = y - 110 - padding; // Move above if near bottom edge
     }
