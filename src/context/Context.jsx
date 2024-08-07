@@ -4,7 +4,7 @@ export const GameContext = createContext({});
 const Context = ({ children }) => {
   const [lines, setLines] = useState([]);
   const [showLines, setShowLines] = useState(true);
-  const [tool, setTool] = useState({pen : true});
+  const [tool, setTool] = useState({pen : false});
 
   return (
     <GameContext.Provider
