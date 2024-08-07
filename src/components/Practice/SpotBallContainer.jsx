@@ -58,7 +58,7 @@ const SpotBallContainer = () => {
 
       setImageDimensions({ width, height });
     }
-  }, [image , windowDimensions?.width]);
+  }, [image , windowDimensions?.width, windowDimensions?.height]);
 
   const handleMouseDown = (e) => {
     const pos = e.target.getStage().getPointerPosition();
