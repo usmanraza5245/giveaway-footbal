@@ -18,7 +18,7 @@ const Page1 = () => {
      
       <div
         style={{
-          marginTop: "5vh",
+          marginTop: "1vh",
           display: "flex",
           flexDirection: "row",
           justifyContent: "center",
