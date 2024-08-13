@@ -12,6 +12,47 @@ import useImage from "use-image";
 import { GameContext } from "../../context/Context";
 
 const SpotBallContainer = () => {
+  const getGameAttemptData = async () => {
+    const _id = "66b9e83d9778aa5d72121e22"; // Your _id value
+    const url = `https://giveawayfootball.codistan.org/api/game/getGameAttemptData?id=${encodeURIComponent(
+      _id
+    )}`;
+
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        // headers: {
+        //   "ngrok-skip-browser-warning": "true",
+        // },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("data: ", data);
+
+      // Set plusSigns from the data
+      const initialPlusSigns = data.data.attempts_array
+        ?.filter(
+          (attempt) => attempt.coordinates && attempt.coordinates.length === 2
+        )
+        ?.map((attempt) => ({
+          x: parseFloat(attempt?.coordinates[0]),
+          y: parseFloat(attempt?.coordinates[1]),
+          item_id: attempt.item_id,
+          color: "blue",
+        }));
+      setPlusSigns(initialPlusSigns);
+    } catch (error) {
+      console.error("There was a problem with the fetch operation:", error);
+    }
+  };
+
+  useEffect(() => {
+    getGameAttemptData()}, []);
+
   const [windowDimensions, setWindowDimensions] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
@@ -24,11 +65,11 @@ const SpotBallContainer = () => {
       });
     };
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     // Cleanup event listener on component unmount
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
@@ -46,19 +87,18 @@ const SpotBallContainer = () => {
   const [magnifierPosition, setMagnifierPosition] = useState({ x: 0, y: 0 });
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
   const [plusSigns, setPlusSigns] = useState([]);
-  
- 
 
   useEffect(() => {
-    if (image ) {
-      const canvasWidth = windowDimensions?.width * 0.8 ; // Set the desired canvas width here
+    if (image) {
+      const canvasWidth = windowDimensions?.width * 0.8; // Set the desired canvas width here
       const aspectRatio = image.width / image.height;
+      console.log("image", image.width, image.height);
       const width = canvasWidth;
       const height = windowDimensions?.height * 0.95;
 
       setImageDimensions({ width, height });
     }
-  }, [image , windowDimensions?.width, windowDimensions?.height]);
+  }, [image, windowDimensions?.width]);
 
   const handleMouseDown = (e) => {
     const pos = e.target.getStage().getPointerPosition();
@@ -74,7 +114,7 @@ const SpotBallContainer = () => {
         {
           ticketPlayed: true,
           coordinates: { x: pos.x.toFixed(0), y: pos.y.toFixed(0) },
-          index: replay  ? replay : newPlusSigns.length - 1, // Send the index of the new plus sign
+          index: replay ? replay : newPlusSigns.length - 1, // Send the index of the new plus sign
         },
         "*"
       );
@@ -129,7 +169,7 @@ const SpotBallContainer = () => {
     return { points };
   };
 
-  const magnifierSize = 80;
+  const magnifierSize = 120;
   const magnifierScale = 5;
 
   const getCoordinatesPosition = () => {
@@ -197,19 +237,23 @@ const SpotBallContainer = () => {
       ) {
         return;
       }
-      
-      if(event.data.replay) {
-        setReplay(event.data.replay);
-      }
 
-      console.log('event.data.replay: ', event.data.replay);
+      // if (event.data) {
+      //   setReplay(event.data);
+      // }
 
-      // Remove the plus sign at the replay index
-      if (event.data.replay !== undefined) {
+
+      if (event.data) {
+        console.log("event.data: ", event.data, );  
+        getGameAttemptData()
+        plusSigns.map((item) =>
+        console.log( "test data", item)
+        )    
         setPlusSigns((prevSigns) =>
-          prevSigns.filter((_, index) => index !== event.data.replay)
+          prevSigns.filter((item) => item !== event.data)
         );
       }
+      
     }
     window.addEventListener("message", handleReplay);
     return () => {
@@ -217,13 +261,19 @@ const SpotBallContainer = () => {
     };
   }, []);
 
+ 
+
+  useEffect(() => {
+    console.log("plusSigns: ", plusSigns);
+  }, [plusSigns]);
+
   return (
     <div>
       <div>
         {image && (
           <Stage
-            width={imageDimensions.width}
-            height={imageDimensions.height}
+            width={imageDimensions?.width}
+            height={imageDimensions?.height}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
@@ -233,14 +283,16 @@ const SpotBallContainer = () => {
           >
             <Layer>
               <Group
-                clipFunc={(ctx) =>
-                  ctx.rect(0, 0, imageDimensions.width, imageDimensions.height)
-                }
+                clipFunc={(ctx) => ctx.rect(0, 0, image?.width, image?.height)}
               >
                 <KonvaImage
                   image={image}
-                  width={imageDimensions.width}
-                  height={imageDimensions.height}
+                  width={image?.width}
+                  height={image?.height}
+                  scale={{
+                    x: imageDimensions.width / image.width,
+                    y: imageDimensions.height / image.height,
+                  }}
                 />
                 {showLines &&
                   lines.map((line, i) => (
