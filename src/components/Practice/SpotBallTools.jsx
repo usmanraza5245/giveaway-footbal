@@ -5,6 +5,7 @@ import { MdOutlineReplay } from "react-icons/md";
 import { RxCross2 } from "react-icons/rx";
 import { FaPen } from "react-icons/fa";
 import { FaPlus } from "react-icons/fa";
+import Switch from "../../UI/Switch";
 
 const SpotBallTools = () => {
   const stageRef = useRef(null);
@@ -48,6 +49,7 @@ const SpotBallTools = () => {
   };
 
   const handleTool = () => {
+    console.log("tool")
     setTool((prev) => ({ ...prev, pen: !prev.pen }));
   };
 
@@ -78,7 +80,7 @@ const SpotBallTools = () => {
   return (
     <div>
       <div style={{ height : windowDimensions.height * 0.95}} className="bg-[#F4F4F4] flex flex-col justify-start items-center z-[-1]  w-[80px] rounded-l-[10px]">
-        <div
+        {/* <div
           onClick={handleTool}
           className="bg-[#05FF00] border border-black rounded-[50%] mt-[30px] mb-[5px] cursor-pointer"
         >
@@ -87,23 +89,28 @@ const SpotBallTools = () => {
           ) : (
             <FaPlus size={20} className="m-[10px] text-white" />
           )}
-        </div>
+        </div> */}
 
-        <p>{!tool.pen ? "Pen" : "Plus"}</p>
+        
+
+        
         <div
           onClick={handleUndo}
-          className="bg-[#FF9900] border border-black rounded-[50%] mt-[10px] mb-[5px] cursor-pointer"
+          className="bg-[#FF9900] border border-black rounded-[50%] mt-[30px] mb-[5px] cursor-pointer"
         >
           <MdOutlineReplay size={30} className="m-[5px] text-white" />
         </div>
         <p>Replay</p>
         <div
           onClick={handleUndo}
-          className="bg-[#FE0000] border border-black rounded-[50%] mt-[10px] mb-[5px] cursor-pointer"
+          className="bg-[#FE0000] border border-black rounded-[50%] mt-[30px] mb-[5px] cursor-pointer"
         >
           <RxCross2 size={30} className="m-[5px] text-white" />
         </div>
         <p>Cancel</p>
+
+        <Switch isChecked={tool.pen} handleToggle={handleTool}  />
+        <p>{tool.pen ? "Line Tool" : "Plus Tool"}</p>
       </div>
     </div>
   );

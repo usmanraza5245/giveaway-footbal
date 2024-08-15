@@ -92,7 +92,7 @@ const SpotBallContainer = () => {
 
   useEffect(() => {
     if (image) {
-      const canvasWidth = windowDimensions?.width * 0.8; // Set the desired canvas width here
+      const canvasWidth = windowDimensions?.width * .85; // Set the desired canvas width here
       const aspectRatio = image.width / image.height;
       console.log("image", image.width, image.height);
       const width = canvasWidth;
@@ -249,6 +249,12 @@ const SpotBallContainer = () => {
       if (event.data.deletedMarker) {
         console.log("delete marker event  ", event.data);
         const set = await getGameAttemptData();
+        if (set) {
+          setPlusSigns((prevSigns) =>
+            prevSigns.filter((item) => item.item_id !== event.data.replayId)
+          );
+        }
+        
       }
 
       if (event.data.replayIndex) {
