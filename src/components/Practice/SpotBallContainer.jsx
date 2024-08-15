@@ -14,6 +14,7 @@ import { GameContext } from "../../context/Context";
 const SpotBallContainer = () => {
   const BASE_URL = "https://giveawayfootball.codistan.org";
   const getGameAttemptData = async () => {
+    console.log('markerId: ', markerId);
     if (markerId) {
       const url = `${BASE_URL}/api/game/getGameAttemptData?id=${encodeURIComponent(
         markerId
@@ -203,10 +204,13 @@ const SpotBallContainer = () => {
         setMarkerId(event.data.idForMarkers);
       }
       if (event.data.deletedMarker) {
+        console.log('event.data.deletedMarker: ', event.data.deletedMarker);
+
         const set = await getGameAttemptData();
         if (set) {
+          console.log('set: ', set);
           setPlusSigns((prevSigns) =>
-            prevSigns.filter((item) => item.item_id !== event.data.replayId)
+            prevSigns.filter((item) => item.item_id !== event.data.deletedMarker)
           );
         }
       }
