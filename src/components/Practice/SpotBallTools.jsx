@@ -79,21 +79,7 @@ const SpotBallTools = () => {
 
   return (
     <div>
-      <div style={{ height : windowDimensions.height * 0.95}} className="bg-[#F4F4F4] flex flex-col justify-start items-center z-[-1]  w-[80px] rounded-l-[10px]">
-        {/* <div
-          onClick={handleTool}
-          className="bg-[#05FF00] border border-black rounded-[50%] mt-[30px] mb-[5px] cursor-pointer"
-        >
-          {!tool.pen ? (
-            <FaPen size={20} className="m-[10px] text-white" />
-          ) : (
-            <FaPlus size={20} className="m-[10px] text-white" />
-          )}
-        </div> */}
-
-        
-
-        
+      <div style={{ height : windowDimensions.height }} className="bg-[#F4F4F4] flex flex-col justify-start items-center z-[-1]  w-[80px] rounded-l-[10px]"> 
         <div
           onClick={handleUndo}
           className="bg-[#FF9900] border border-black rounded-[50%] mt-[30px] mb-[5px] cursor-pointer"

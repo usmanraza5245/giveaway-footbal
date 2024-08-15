@@ -92,11 +92,11 @@ const SpotBallContainer = () => {
 
   useEffect(() => {
     if (image) {
-      const canvasWidth = windowDimensions?.width * .85; // Set the desired canvas width here
+      const canvasWidth = windowDimensions?.width - 80; // Set the desired canvas width here
       const aspectRatio = image.width / image.height;
       console.log("image", image.width, image.height);
       const width = canvasWidth;
-      const height = windowDimensions?.height * 0.95;
+      const height = windowDimensions?.height;
 
       setImageDimensions({ width, height });
     }
@@ -282,8 +282,7 @@ const SpotBallContainer = () => {
   }, []);
 
   return (
-    <div>
-      <div>
+    <div style={{ width : "100%" }}>
         {image && (
           <Stage
             width={imageDimensions?.width}
@@ -494,7 +493,6 @@ const SpotBallContainer = () => {
           </Stage>
         )}
       </div>
-    </div>
   );
 };
 

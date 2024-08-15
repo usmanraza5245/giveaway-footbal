@@ -18,13 +18,13 @@ const Page1 = () => {
      
       <div
         style={{
-          marginTop: "1vh",
+          // marginTop: "1vh",
           display: "flex",
           flexDirection: "row",
           justifyContent: "center",
           height: "85vh",
-          maxHeight: "638px",
-          minHeight: "638px",
+          // maxHeight: "638px",
+          // minHeight: "638px",
         }}
       >
         <SpotBallTools />
