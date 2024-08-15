@@ -12,46 +12,43 @@ import useImage from "use-image";
 import { GameContext } from "../../context/Context";
 
 const SpotBallContainer = () => {
+  const BASE_URL = "https://giveawayfootball.codistan.org";
   const getGameAttemptData = async () => {
-    const _id = "66b9e83d9778aa5d72121e22"; // Your _id value
-    const url = `https://giveawayfootball.codistan.org/api/game/getGameAttemptData?id=${encodeURIComponent(
-      _id
-    )}`;
+    if (markerId) {
+      const url = `${BASE_URL}/api/game/getGameAttemptData?id=${encodeURIComponent(
+        markerId
+      )}`;
+      try {
+        const response = await fetch(url, {
+          method: "GET",
+        });
 
-    try {
-      const response = await fetch(url, {
-        method: "GET",
-        // headers: {
-        //   "ngrok-skip-browser-warning": "true",
-        // },
-      });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        console.log("data: ", data);
+
+        // Set plusSigns from the data
+        const initialPlusSigns = data.data.attempts_array
+          ?.filter(
+            (attempt) => attempt.coordinates && attempt.coordinates.length === 2
+          )
+          ?.map((attempt) => ({
+            x: parseFloat(attempt?.coordinates[0]),
+            y: parseFloat(attempt?.coordinates[1]),
+            item_id: attempt.item_id,
+            color: "blue",
+          }));
+        setPlusSigns(initialPlusSigns);
+        return initialPlusSigns;
+        console.log("set+++++++: ", initialPlusSigns);
+      } catch (error) {
+        console.error("There was a problem with the fetch operation:", error);
       }
-
-      const data = await response.json();
-      console.log("data: ", data);
-
-      // Set plusSigns from the data
-      const initialPlusSigns = data.data.attempts_array
-        ?.filter(
-          (attempt) => attempt.coordinates && attempt.coordinates.length === 2
-        )
-        ?.map((attempt) => ({
-          x: parseFloat(attempt?.coordinates[0]),
-          y: parseFloat(attempt?.coordinates[1]),
-          item_id: attempt.item_id,
-          color: "blue",
-        }));
-      setPlusSigns(initialPlusSigns);
-    } catch (error) {
-      console.error("There was a problem with the fetch operation:", error);
     }
   };
-
-  useEffect(() => {
-    getGameAttemptData()}, []);
 
   const [windowDimensions, setWindowDimensions] = useState({
     width: window.innerWidth,
@@ -87,6 +84,11 @@ const SpotBallContainer = () => {
   const [magnifierPosition, setMagnifierPosition] = useState({ x: 0, y: 0 });
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
   const [plusSigns, setPlusSigns] = useState([]);
+  const [markerId, setMarkerId] = useState(null);
+
+  useEffect(() => {
+    getGameAttemptData();
+  }, [markerId]);
 
   useEffect(() => {
     if (image) {
@@ -100,14 +102,16 @@ const SpotBallContainer = () => {
     }
   }, [image, windowDimensions?.width]);
 
-  const handleMouseDown = (e) => {
+  const handleMouseDown = async (e) => {
     const pos = e.target.getStage().getPointerPosition();
     if (tool.pen) {
       setStartPoint(pos);
       setEndPoint(pos);
     } else {
       const newPlusSigns = [...plusSigns, { ...pos, color: "blue" }];
+      // console.log(replay , newPlusSigns)
       setPlusSigns(newPlusSigns);
+      // console.log("mouse Down++",newPlusSigns)
       localStorage.setItem(`x_${plusSigns.length}`, pos.x);
       localStorage.setItem(`y_${plusSigns.length}`, pos.y);
       window.top.postMessage(
@@ -118,6 +122,7 @@ const SpotBallContainer = () => {
         },
         "*"
       );
+      // getGameAttemptData()
     }
   };
 
@@ -169,7 +174,7 @@ const SpotBallContainer = () => {
     return { points };
   };
 
-  const magnifierSize = 120;
+  const magnifierSize = 80;
   const magnifierScale = 5;
 
   const getCoordinatesPosition = () => {
@@ -196,76 +201,79 @@ const SpotBallContainer = () => {
     return { x: xPos, y: yPos };
   };
 
+  // useEffect(() => {
+  //   function handleMessage(event) {
+  //     if (
+  //       event.origin !== "https://hw-dream-drive-test-store.myshopify.com" &&
+  //       event.origin !== "http://localhost:5173"
+  //     ) {
+  //       return;
+  //     }
+  //     setMessage(event.data);
+
+  //     // Update the color of the plus sign at the given index
+  //     if (event.data.index !== undefined) {
+  //       if (event.data.index === -1) {
+  //         setPlusSigns((prevSigns) =>
+  //           prevSigns.map((sign) => ({ ...sign, color: "blue" }))
+  //         );
+  //       } else {
+  //         setPlusSigns((prevSigns) =>
+  //           prevSigns.map((sign, idx) =>
+  //             idx === event.data.index
+  //               ? { ...sign, color: "green" }
+  //               : { ...sign, color: "blue" }
+  //           )
+  //         );
+  //       }
+  //     }
+  //   }
+  //   window.addEventListener("message", handleMessage);
+  //   return () => {
+  //     window.removeEventListener("message", handleMessage);
+  //   };
+  // }, []);
+
   useEffect(() => {
-    function handleMessage(event) {
+    async function handleReplay(event) {
       if (
         event.origin !== "https://hw-dream-drive-test-store.myshopify.com" &&
         event.origin !== "http://localhost:5173"
       ) {
         return;
       }
-      setMessage(event.data);
 
-      // Update the color of the plus sign at the given index
-      if (event.data.index !== undefined) {
-        if (event.data.index === -1) {
+      if (event.data.idForMarkers) {
+        setMarkerId(event.data.idForMarkers);
+      }
+      if (event.data.deletedMarker) {
+        console.log("delete marker event  ", event.data);
+        const set = await getGameAttemptData();
+      }
+
+      if (event.data.replayIndex) {
+        setReplay(event.data.replayIndex);
+        console.log("event.data: ", event.data);
+        const set = await getGameAttemptData();
+        if (set) {
+          console.log("plusSigns++++++++++++++++", plusSigns);
           setPlusSigns((prevSigns) =>
-            prevSigns.map((sign) => ({ ...sign, color: "blue" }))
-          );
-        } else {
-          setPlusSigns((prevSigns) =>
-            prevSigns.map((sign, idx) =>
-              idx === event.data.index
-                ? { ...sign, color: "green" }
-                : { ...sign, color: "blue" }
-            )
+            prevSigns.filter((item) => item.item_id !== event.data.replayId)
           );
         }
+
+        // const removedIndex = plusSigns?.filter((item) => item.item_id !== event.data.replayId)
+        // console.log("removedIndex",removedIndex)
+        // plusSigns.map((item) =>
+        // console.log( "test data", item)
+        // )
       }
-    }
-    window.addEventListener("message", handleMessage);
-    return () => {
-      window.removeEventListener("message", handleMessage);
-    };
-  }, []);
-
-  useEffect(() => {
-    function handleReplay(event) {
-      if (
-        event.origin !== "https://hw-dream-drive-test-store.myshopify.com" &&
-        event.origin !== "http://localhost:5173"
-      ) {
-        return;
-      }
-
-      // if (event.data) {
-      //   setReplay(event.data);
-      // }
-
-
-      if (event.data) {
-        console.log("event.data: ", event.data, );  
-        getGameAttemptData()
-        plusSigns.map((item) =>
-        console.log( "test data", item)
-        )    
-        setPlusSigns((prevSigns) =>
-          prevSigns.filter((item) => item !== event.data)
-        );
-      }
-      
     }
     window.addEventListener("message", handleReplay);
     return () => {
       window.removeEventListener("message", handleReplay);
     };
   }, []);
-
- 
-
-  useEffect(() => {
-    console.log("plusSigns: ", plusSigns);
-  }, [plusSigns]);
 
   return (
     <div>
