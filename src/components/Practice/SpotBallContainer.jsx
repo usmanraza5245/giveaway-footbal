@@ -28,9 +28,6 @@ const SpotBallContainer = () => {
         }
 
         const data = await response.json();
-        console.log("data: ", data);
-
-        // Set plusSigns from the data
         const initialPlusSigns = data.data.attempts_array
           ?.filter(
             (attempt) => attempt.coordinates && attempt.coordinates.length === 2
@@ -43,7 +40,6 @@ const SpotBallContainer = () => {
           }));
         setPlusSigns(initialPlusSigns);
         return initialPlusSigns;
-        console.log("set+++++++: ", initialPlusSigns);
       } catch (error) {
         console.error("There was a problem with the fetch operation:", error);
       }
@@ -64,7 +60,6 @@ const SpotBallContainer = () => {
 
     window.addEventListener("resize", handleResize);
 
-    // Cleanup event listener on component unmount
     return () => {
       window.removeEventListener("resize", handleResize);
     };
@@ -92,9 +87,8 @@ const SpotBallContainer = () => {
 
   useEffect(() => {
     if (image) {
-      const canvasWidth = windowDimensions?.width - 80; // Set the desired canvas width here
+      const canvasWidth = windowDimensions?.width - 80;
       const aspectRatio = image.width / image.height;
-      console.log("image", image.width, image.height);
       const width = canvasWidth;
       const height = windowDimensions?.height;
 
@@ -109,20 +103,17 @@ const SpotBallContainer = () => {
       setEndPoint(pos);
     } else {
       const newPlusSigns = [...plusSigns, { ...pos, color: "blue" }];
-      // console.log(replay , newPlusSigns)
       setPlusSigns(newPlusSigns);
-      // console.log("mouse Down++",newPlusSigns)
       localStorage.setItem(`x_${plusSigns.length}`, pos.x);
       localStorage.setItem(`y_${plusSigns.length}`, pos.y);
       window.top.postMessage(
         {
           ticketPlayed: true,
           coordinates: { x: pos.x.toFixed(0), y: pos.y.toFixed(0) },
-          index: replay ? replay : newPlusSigns.length - 1, // Send the index of the new plus sign
+          index: replay ? replay : newPlusSigns.length - 1,
         },
         "*"
       );
-      // getGameAttemptData()
     }
   };
 
@@ -158,7 +149,6 @@ const SpotBallContainer = () => {
     let points = [start.x, start.y];
 
     if (Math.abs(dx) > Math.abs(dy)) {
-      // Line is more horizontal
       if (dx > 0) {
         points.push(width, start.y + ((width - start.x) * dy) / dx);
       } else {
@@ -182,57 +172,23 @@ const SpotBallContainer = () => {
     const { x, y } = cursorPosition;
     const { width, height } = imageDimensions;
 
-    let xPos = x - 80; // Default position to the left
-    let yPos = y - 55; // Default position above
+    let xPos = x - 115;
+    let yPos = y - 60;
 
-    // Adjust position based on cursor position
     if (x < 80) {
-      xPos = x + padding; // Move to the right if near left edge
+      xPos = x + padding;
     } else if (x > width) {
-      xPos = x - 160 - padding; // Move to the left if near right edge
+      xPos = x - 160 - padding;
     }
 
     if (y < 55) {
-      yPos = y + padding + 40; // Move below if near top edge
+      yPos = y + padding + 40;
     } else if (y > height) {
-      yPos = y - 110 - padding; // Move above if near bottom edge
+      yPos = y - 110 - padding;
     }
 
     return { x: xPos, y: yPos };
   };
-
-  // useEffect(() => {
-  //   function handleMessage(event) {
-  //     if (
-  //       event.origin !== "https://hw-dream-drive-test-store.myshopify.com" &&
-  //       event.origin !== "http://localhost:5173"
-  //     ) {
-  //       return;
-  //     }
-  //     setMessage(event.data);
-
-  //     // Update the color of the plus sign at the given index
-  //     if (event.data.index !== undefined) {
-  //       if (event.data.index === -1) {
-  //         setPlusSigns((prevSigns) =>
-  //           prevSigns.map((sign) => ({ ...sign, color: "blue" }))
-  //         );
-  //       } else {
-  //         setPlusSigns((prevSigns) =>
-  //           prevSigns.map((sign, idx) =>
-  //             idx === event.data.index
-  //               ? { ...sign, color: "green" }
-  //               : { ...sign, color: "blue" }
-  //           )
-  //         );
-  //       }
-  //     }
-  //   }
-  //   window.addEventListener("message", handleMessage);
-  //   return () => {
-  //     window.removeEventListener("message", handleMessage);
-  //   };
-  // }, []);
 
   useEffect(() => {
     async function handleReplay(event) {
@@ -247,32 +203,22 @@ const SpotBallContainer = () => {
         setMarkerId(event.data.idForMarkers);
       }
       if (event.data.deletedMarker) {
-        console.log("delete marker event  ", event.data);
         const set = await getGameAttemptData();
         if (set) {
           setPlusSigns((prevSigns) =>
             prevSigns.filter((item) => item.item_id !== event.data.replayId)
           );
         }
-        
       }
 
       if (event.data.replayIndex) {
         setReplay(event.data.replayIndex);
-        console.log("event.data: ", event.data);
         const set = await getGameAttemptData();
         if (set) {
-          console.log("plusSigns++++++++++++++++", plusSigns);
           setPlusSigns((prevSigns) =>
             prevSigns.filter((item) => item.item_id !== event.data.replayId)
           );
         }
-
-        // const removedIndex = plusSigns?.filter((item) => item.item_id !== event.data.replayId)
-        // console.log("removedIndex",removedIndex)
-        // plusSigns.map((item) =>
-        // console.log( "test data", item)
-        // )
       }
     }
     window.addEventListener("message", handleReplay);
@@ -282,19 +228,20 @@ const SpotBallContainer = () => {
   }, []);
 
   return (
-    <div style={{ width : "100%" }}>
-        {image && (
-          <Stage
-            width={imageDimensions?.width}
-            height={imageDimensions?.height}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            style={{
-              cursor: "crosshair",
-            }}
-          >
-            <Layer>
+    <div style={{ width: "100%" }}>
+      {image && (
+        <Stage
+          width={imageDimensions?.width}
+          height={imageDimensions?.height}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          style={{
+            cursor: "crosshair",
+            
+          }}
+        >
+          <Layer>
               <Group
                 clipFunc={(ctx) => ctx.rect(0, 0, image?.width, image?.height)}
               >
@@ -331,168 +278,160 @@ const SpotBallContainer = () => {
                 {plusSigns.map((plusSign, index) => (
                   <Group key={index}>
                     <Line
-                      points={[
-                        plusSign.x - 10,
-                        plusSign.y,
-                        plusSign.x + 10,
-                        plusSign.y,
-                      ]}
-                      stroke={plusSign.color}
+                      points={[plusSign.x - 10, plusSign.y, plusSign.x + 10, plusSign.y]}
+                      stroke="#05FF00"
                       strokeWidth={2}
                       lineCap="round"
+                      shadowColor="black"
+                      shadowBlur={2}
+                      shadowOpacity={1}
+                      shadowOffset={{ x: 0, y: 0 }}
                     />
                     <Line
-                      points={[
-                        plusSign.x,
-                        plusSign.y - 10,
-                        plusSign.x,
-                        plusSign.y + 10,
-                      ]}
-                      stroke={plusSign.color}
+                      points={[plusSign.x, plusSign.y - 10, plusSign.x, plusSign.y + 10]}
+                      stroke="#05FF00"
                       strokeWidth={2}
                       lineCap="round"
+                      shadowColor="black"
+                      shadowBlur={2}
+                      shadowOpacity={1}
+                      shadowOffset={{ x: 0, y: 0 }}
                     />
                   </Group>
                 ))}
               </Group>
 
-              {/* Magnifier Group */}
-              {!startPoint && (
-                <Group
-                  x={magnifierPosition.x - magnifierSize / 2}
-                  y={magnifierPosition.y - magnifierSize / 2}
-                  clipFunc={(ctx) => {
-                    ctx.arc(
-                      magnifierSize / 2,
-                      magnifierSize / 2,
-                      magnifierSize / 2,
-                      0,
-                      Math.PI * 2
-                    );
-                  }}
-                >
-                  <KonvaImage
-                    image={image}
-                    x={
-                      -magnifierPosition.x * magnifierScale + magnifierSize / 2
-                    }
-                    y={
-                      -magnifierPosition.y * magnifierScale + magnifierSize / 2
-                    }
-                    width={imageDimensions.width * magnifierScale}
-                    height={imageDimensions.height * magnifierScale}
-                  />
-                </Group>
-              )}
-              {/* Overlay Group for drawing plus icons and lines without scaling */}
-              <Group>
-                {showLines &&
-                  lines.map((line, i) => (
-                    <Line
-                      key={i}
-                      points={line.points}
-                      stroke="black"
-                      strokeWidth={1}
-                      lineCap="round"
-                      lineJoin="round"
-                    />
-                  ))}
-                {startPoint && endPoint && (
+            {!startPoint && (
+              <Group
+                x={magnifierPosition.x - magnifierSize / 2}
+                y={magnifierPosition.y - magnifierSize / 2}
+                clipFunc={(ctx) => {
+                  ctx.arc(
+                    magnifierSize / 2,
+                    magnifierSize / 2,
+                    magnifierSize / 2,
+                    0,
+                    Math.PI * 2
+                  );
+                }}
+              >
+                <KonvaImage
+                  image={image}
+                  x={-magnifierPosition.x * magnifierScale + magnifierSize / 2}
+                  y={-magnifierPosition.y * magnifierScale + magnifierSize / 2}
+                  width={imageDimensions.width * magnifierScale}
+                  height={imageDimensions.height * magnifierScale}
+                />
+              </Group>
+            )}
+
+            <Group>
+              {showLines &&
+                lines.map((line, i) => (
                   <Line
-                    points={getFullLine(startPoint, endPoint).points}
-                    stroke="red"
-                    strokeWidth={2}
+                    key={i}
+                    points={line.points}
+                    stroke="black"
+                    strokeWidth={1}
                     lineCap="round"
                     lineJoin="round"
-                    dash={[10, 5]}
                   />
-                )}
-                {plusSigns.map((plusSign, index) => (
-                  <Group key={index}>
-                    <Line
-                      points={[
-                        plusSign.x - 10,
-                        plusSign.y,
-                        plusSign.x + 10,
-                        plusSign.y,
-                      ]}
-                      stroke={plusSign.color}
-                      strokeWidth={2}
-                      lineCap="round"
-                    />
-                    <Line
-                      points={[
-                        plusSign.x,
-                        plusSign.y - 10,
-                        plusSign.x,
-                        plusSign.y + 10,
-                      ]}
-                      stroke={plusSign.color}
-                      strokeWidth={2}
-                      lineCap="round"
-                    />
-                  </Group>
                 ))}
-              </Group>
-              {/* Group to hold circle and line marks */}
-              <Group
-                x={cursorPosition.x - magnifierSize / 2}
-                y={cursorPosition.y - magnifierSize / 2}
-              >
-                <Circle
-                  x={magnifierSize / 2}
-                  y={magnifierSize / 2}
-                  radius={magnifierSize / 2}
-                  stroke="white"
-                  strokeWidth={1}
-                />
-                {/* Add marks on top, bottom, left, and right */}
+              {startPoint && endPoint && (
                 <Line
-                  points={[magnifierSize / 2, -10, magnifierSize / 2, 0]}
-                  stroke="white"
-                  strokeWidth={1}
+                  points={getFullLine(startPoint, endPoint).points}
+                  stroke="red"
+                  strokeWidth={2}
+                  lineCap="round"
+                  lineJoin="round"
+                  dash={[10, 5]}
                 />
-                <Line
-                  points={[
-                    magnifierSize / 2,
-                    magnifierSize,
-                    magnifierSize / 2,
-                    magnifierSize + 10,
-                  ]}
-                  stroke="white"
-                  strokeWidth={1}
-                />
-                <Line
-                  points={[-10, magnifierSize / 2, 0, magnifierSize / 2]}
-                  stroke="white"
-                  strokeWidth={1}
-                />
-                <Line
-                  points={[
-                    magnifierSize,
-                    magnifierSize / 2,
-                    magnifierSize + 10,
-                    magnifierSize / 2,
-                  ]}
-                  stroke="white"
-                  strokeWidth={1}
-                />
-              </Group>
+              )}
+              {plusSigns.map((plusSign, index) => (
+                <Group key={index}>
+                  <Line
+                    points={[plusSign.x - 10, plusSign.y, plusSign.x + 10, plusSign.y]}
+                    stroke="white"
+                    strokeWidth={2}
+                    lineCap="round"
+                    shadowColor="black"
+                    shadowBlur={2}
+                    shadowOpacity={1}
+                    shadowOffset={{ x: 0, y: 0 }}
+                  />
+                  <Line
+                    points={[plusSign.x, plusSign.y - 10, plusSign.x, plusSign.y + 10]}
+                    stroke="white"
+                    strokeWidth={2}
+                    lineCap="round"
+                    shadowColor="black"
+                    shadowBlur={2}
+                    shadowOpacity={1}
+                    shadowOffset={{ x: 0, y: 0 }}
+                  />
+                </Group>
+              ))}
+            </Group>
 
-              <Text
-                x={getCoordinatesPosition().x}
-                y={getCoordinatesPosition().y}
-                text={`x: ${Math.floor(cursorPosition.x)}, y: ${Math.floor(
-                  cursorPosition.y
-                )}`}
-                fontSize={14}
-                fill="white"
-                fontFamily="Sitara"
+            <Group
+              x={cursorPosition.x - magnifierSize / 2}
+              y={cursorPosition.y - magnifierSize / 2}
+            >
+              <Circle
+                x={magnifierSize / 2}
+                y={magnifierSize / 2}
+                radius={magnifierSize / 2}
+                stroke="#05FF00"
+                strokeWidth={1}
               />
-            </Layer>
-          </Stage>
-        )}
-      </div>
+              <Line
+                points={[magnifierSize / 2, -10, magnifierSize / 2, 0]}
+                stroke="#05FF00"
+                strokeWidth={1}
+              />
+              <Line
+                points={[
+                  magnifierSize / 2,
+                  magnifierSize,
+                  magnifierSize / 2,
+                  magnifierSize + 10,
+                ]}
+                stroke="#05FF00"
+                strokeWidth={1}
+              />
+              <Line
+                points={[-10, magnifierSize / 2, 0, magnifierSize / 2]}
+                stroke="#05FF00"
+                strokeWidth={1}
+              />
+              <Line
+                points={[
+                  magnifierSize,
+                  magnifierSize / 2,
+                  magnifierSize + 10,
+                  magnifierSize / 2,
+                ]}
+                stroke="green"
+                strokeWidth={1}
+              />
+            </Group>
+
+            <Text
+              x={getCoordinatesPosition().x}
+              y={getCoordinatesPosition().y}
+              text={`x: ${Math.floor(cursorPosition.x)}    y: ${Math.floor(
+                cursorPosition.y
+              )}`}
+              fontSize={16}
+              fill="white"
+              stroke="black"
+              strokeWidth={1}
+              fontStyle="bold"
+            />
+          </Layer>
+        </Stage>
+      )}
+    </div>
   );
 };
 
