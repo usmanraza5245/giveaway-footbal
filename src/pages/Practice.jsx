@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import SpotBallTools from "../components/Practice/SpotBallTools";
 import SpotBallInfo from "../components/Practice/SpotBallInfo";
 import SpotBallContainer from "../components/Practice/SpotBallContainer";
-import TestComponent from "../components/TestComponent";
 
 const Page1 = () => {
  

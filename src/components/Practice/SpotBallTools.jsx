@@ -95,8 +95,9 @@ const SpotBallTools = () => {
         </div>
         <p>Cancel</p>
 
-        <Switch isChecked={tool.pen} handleToggle={handleTool}  />
-        <p>{tool.pen ? "Line Tool" : "Plus Tool"}</p>
+        <Switch isChecked={!tool.pen} handleToggle={handleTool}  />
+        {/* <p>{tool.pen ? "Line Tool" : "Plus Tool"}</p> */}
+        <p>Plus Tool</p>
       </div>
     </div>
   );

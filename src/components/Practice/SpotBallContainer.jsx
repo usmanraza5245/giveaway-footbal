@@ -13,11 +13,12 @@ import { GameContext } from "../../context/Context";
 
 const SpotBallContainer = () => {
   const BASE_URL = "https://giveawayfootball.codistan.org";
-  const getGameAttemptData = async () => {
-    console.log('markerId: ', markerId);
-    if (markerId) {
+  
+  const getGameAttemptData = async (id) => {
+    
+   
       const url = `${BASE_URL}/api/game/getGameAttemptData?id=${encodeURIComponent(
-        markerId
+        id
       )}`;
       try {
         const response = await fetch(url, {
@@ -44,13 +45,14 @@ const SpotBallContainer = () => {
       } catch (error) {
         console.error("There was a problem with the fetch operation:", error);
       }
-    }
+    
   };
 
   const [windowDimensions, setWindowDimensions] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
   });
+
   useEffect(() => {
     const handleResize = () => {
       setWindowDimensions({
@@ -83,7 +85,9 @@ const SpotBallContainer = () => {
   const [markerId, setMarkerId] = useState(null);
 
   useEffect(() => {
-    getGameAttemptData();
+    if(markerId){
+      getGameAttemptData(markerId);
+    }
   }, [markerId]);
 
   useEffect(() => {
@@ -99,18 +103,26 @@ const SpotBallContainer = () => {
 
   const handleMouseDown = async (e) => {
     const pos = e.target.getStage().getPointerPosition();
+    const clampedPos = {
+      x: Math.max(pos.x, 0),
+      y: Math.max(pos.y, 0),
+    };
+
     if (tool.pen) {
-      setStartPoint(pos);
-      setEndPoint(pos);
+      setStartPoint(clampedPos);
+      setEndPoint(clampedPos);
     } else {
-      const newPlusSigns = [...plusSigns, { ...pos, color: "blue" }];
+      const newPlusSigns = [...plusSigns, { ...clampedPos, color: "blue" }];
       setPlusSigns(newPlusSigns);
-      localStorage.setItem(`x_${plusSigns.length}`, pos.x);
-      localStorage.setItem(`y_${plusSigns.length}`, pos.y);
+      localStorage.setItem(`x_${plusSigns.length}`, clampedPos.x);
+      localStorage.setItem(`y_${plusSigns.length}`, clampedPos.y);
       window.top.postMessage(
         {
           ticketPlayed: true,
-          coordinates: { x: pos.x.toFixed(0), y: pos.y.toFixed(0) },
+          coordinates: {
+            x: clampedPos.x.toFixed(0),
+            y: clampedPos.y.toFixed(0),
+          },
           index: replay ? replay : newPlusSigns.length - 1,
         },
         "*"
@@ -120,17 +132,26 @@ const SpotBallContainer = () => {
 
   const handleMouseMove = (e) => {
     const pos = e.target.getStage().getPointerPosition();
-    setMagnifierPosition(pos);
+    const clampedPos = {
+      x: Math.max(pos.x , 0),
+      y: Math.max(pos.y , 0),
+    };
+
+    setMagnifierPosition(clampedPos);
 
     if (startPoint) {
-      const angle = Math.atan2(pos.y - startPoint.y, pos.x - startPoint.x);
+      const angle = Math.atan2(
+        clampedPos.y - startPoint.y,
+        clampedPos.x - startPoint.x
+      );
       const newEndPoint = {
         x: startPoint.x + 500 * Math.cos(angle),
         y: startPoint.y + 500 * Math.sin(angle),
       };
       setEndPoint(newEndPoint);
     }
-    setCursorPosition(pos);
+
+    setCursorPosition(clampedPos);
   };
 
   const handleMouseUp = () => {
@@ -204,20 +225,24 @@ const SpotBallContainer = () => {
         setMarkerId(event.data.idForMarkers);
       }
       if (event.data.deletedMarker) {
-        console.log('event.data.deletedMarker: ', event.data.deletedMarker);
+        console.log("event.data.deletedMarker: ", event.data);
 
-        const set = await getGameAttemptData();
+        const set = await getGameAttemptData(event.data?._id);
+        console.log("plus+++++++++++", plusSigns);
         if (set) {
-          console.log('set: ', set);
+          console.log("set: ", set);
           setPlusSigns((prevSigns) =>
-            prevSigns.filter((item) => item.item_id !== event.data.deletedMarker)
+            prevSigns.filter(
+              (item) => item.item_id !== event.data.deletedMarker
+            )
           );
         }
       }
 
       if (event.data.replayIndex) {
+        console.log('event.data: ', event.data);
         setReplay(event.data.replayIndex);
-        const set = await getGameAttemptData();
+        const set = await getGameAttemptData(event.data?._id);
         if (set) {
           setPlusSigns((prevSigns) =>
             prevSigns.filter((item) => item.item_id !== event.data.replayId)
@@ -241,95 +266,22 @@ const SpotBallContainer = () => {
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           style={{
-            cursor: "crosshair",
-            
+            cursor: "url('cursor.svg') 12 12, auto",
           }}
         >
           <Layer>
-              <Group
-                clipFunc={(ctx) => ctx.rect(0, 0, image?.width, image?.height)}
-              >
-                <KonvaImage
-                  image={image}
-                  width={image?.width}
-                  height={image?.height}
-                  scale={{
-                    x: imageDimensions.width / image.width,
-                    y: imageDimensions.height / image.height,
-                  }}
-                />
-                {showLines &&
-                  lines.map((line, i) => (
-                    <Line
-                      key={i}
-                      points={line.points}
-                      stroke="black"
-                      strokeWidth={1}
-                      lineCap="round"
-                      lineJoin="round"
-                    />
-                  ))}
-                {startPoint && endPoint && (
-                  <Line
-                    points={getFullLine(startPoint, endPoint).points}
-                    stroke="red"
-                    strokeWidth={2}
-                    lineCap="round"
-                    lineJoin="round"
-                    dash={[10, 5]}
-                  />
-                )}
-                {plusSigns.map((plusSign, index) => (
-                  <Group key={index}>
-                    <Line
-                      points={[plusSign.x - 10, plusSign.y, plusSign.x + 10, plusSign.y]}
-                      stroke="#05FF00"
-                      strokeWidth={2}
-                      lineCap="round"
-                      shadowColor="black"
-                      shadowBlur={2}
-                      shadowOpacity={1}
-                      shadowOffset={{ x: 0, y: 0 }}
-                    />
-                    <Line
-                      points={[plusSign.x, plusSign.y - 10, plusSign.x, plusSign.y + 10]}
-                      stroke="#05FF00"
-                      strokeWidth={2}
-                      lineCap="round"
-                      shadowColor="black"
-                      shadowBlur={2}
-                      shadowOpacity={1}
-                      shadowOffset={{ x: 0, y: 0 }}
-                    />
-                  </Group>
-                ))}
-              </Group>
-
-            {!startPoint && (
-              <Group
-                x={magnifierPosition.x - magnifierSize / 2}
-                y={magnifierPosition.y - magnifierSize / 2}
-                clipFunc={(ctx) => {
-                  ctx.arc(
-                    magnifierSize / 2,
-                    magnifierSize / 2,
-                    magnifierSize / 2,
-                    0,
-                    Math.PI * 2
-                  );
+            <Group
+              clipFunc={(ctx) => ctx.rect(0, 0, image?.width, image?.height)}
+            >
+              <KonvaImage
+                image={image}
+                width={image?.width}
+                height={image?.height}
+                scale={{
+                  x: imageDimensions.width / image.width,
+                  y: imageDimensions.height / image.height,
                 }}
-              >
-                <KonvaImage
-                  image={image}
-                  x={-magnifierPosition.x * magnifierScale + magnifierSize / 2}
-                  y={-magnifierPosition.y * magnifierScale + magnifierSize / 2}
-                  width={imageDimensions.width * magnifierScale}
-                  height={imageDimensions.height * magnifierScale}
-                />
-              </Group>
-            )}
-
-            <Group>
+              />
               {showLines &&
                 lines.map((line, i) => (
                   <Line
@@ -354,7 +306,12 @@ const SpotBallContainer = () => {
               {plusSigns.map((plusSign, index) => (
                 <Group key={index}>
                   <Line
-                    points={[plusSign.x - 10, plusSign.y, plusSign.x + 10, plusSign.y]}
+                    points={[
+                      plusSign.x - 10,
+                      plusSign.y,
+                      plusSign.x + 10,
+                      plusSign.y,
+                    ]}
                     stroke="white"
                     strokeWidth={2}
                     lineCap="round"
@@ -364,7 +321,12 @@ const SpotBallContainer = () => {
                     shadowOffset={{ x: 0, y: 0 }}
                   />
                   <Line
-                    points={[plusSign.x, plusSign.y - 10, plusSign.x, plusSign.y + 10]}
+                    points={[
+                      plusSign.x,
+                      plusSign.y - 10,
+                      plusSign.x,
+                      plusSign.y + 10,
+                    ]}
                     stroke="white"
                     strokeWidth={2}
                     lineCap="round"
@@ -376,6 +338,30 @@ const SpotBallContainer = () => {
                 </Group>
               ))}
             </Group>
+
+            {!startPoint && (
+              <Group
+                x={magnifierPosition.x - magnifierSize / 2}
+                y={magnifierPosition.y - magnifierSize / 2}
+                clipFunc={(ctx) => {
+                  ctx.arc(
+                    magnifierSize / 2,
+                    magnifierSize / 2,
+                    magnifierSize / 2,
+                    0,
+                    Math.PI * 2
+                  );
+                }}
+              >
+                <KonvaImage
+                  image={image}
+                  x={-magnifierPosition.x * magnifierScale + magnifierSize / 2}
+                  y={-magnifierPosition.y * magnifierScale + magnifierSize / 2}
+                  width={imageDimensions.width * magnifierScale}
+                  height={imageDimensions.height * magnifierScale}
+                />
+              </Group>
+            )}
 
             <Group
               x={cursorPosition.x - magnifierSize / 2}
@@ -415,7 +401,7 @@ const SpotBallContainer = () => {
                   magnifierSize + 10,
                   magnifierSize / 2,
                 ]}
-                stroke="green"
+                stroke="#05FF00"
                 strokeWidth={1}
               />
             </Group>
