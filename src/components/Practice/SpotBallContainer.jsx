@@ -67,7 +67,7 @@ const SpotBallContainer = () => {
 
   const [widthCanvas, setWidthCanvas] = useState(null);
   const [message, setMessage] = useState("");
-  const [replay, setReplay] = useState("");
+  const [replay, setReplay] = useState(null);
   const { lines, setLines, showLines, tool } = useContext(GameContext);
   const [startPoint, setStartPoint] = useState(null);
   const [endPoint, setEndPoint] = useState(null);
@@ -219,7 +219,6 @@ const SpotBallContainer = () => {
 
         return;
       }
-      console.log('event: ', event.data);
       if (event.data.idForMarkers) {
         setMarkerId(event.data.idForMarkers);
       }
@@ -234,14 +233,16 @@ const SpotBallContainer = () => {
         }
       }
 
-      if (event.data.replayIndex) {
+      if (event.data.replayId) {
         console.log("handle replay" , event.data)
         setReplay(event.data.replayIndex);
         const set = await getGameAttemptData(event.data?._id);
+        console.log('set: ------- ', set);
         if (set) {
           setPlusSigns((prevSigns) =>
             prevSigns.filter((item) => item.item_id !== event.data.replayId)
           );
+          setReplay(null);
         }
       }
     }
