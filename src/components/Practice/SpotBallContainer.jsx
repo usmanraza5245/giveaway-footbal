@@ -212,12 +212,14 @@ const SpotBallContainer = () => {
   useEffect(() => {
     async function handleReplay(event) {
       if (
-        event.origin !== "https://hw-dream-drive-test-store.myshopify.com" &&
+        event.origin !== "https://dreamdrive.co.za" &&
         event.origin !== "http://localhost:5173"
       ) {
+      
+
         return;
       }
-
+      console.log('event: ', event.data);
       if (event.data.idForMarkers) {
         setMarkerId(event.data.idForMarkers);
       }
@@ -233,6 +235,7 @@ const SpotBallContainer = () => {
       }
 
       if (event.data.replayIndex) {
+        console.log("handle replay" , event.data)
         setReplay(event.data.replayIndex);
         const set = await getGameAttemptData(event.data?._id);
         if (set) {
