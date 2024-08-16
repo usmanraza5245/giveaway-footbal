@@ -15,37 +15,34 @@ const SpotBallContainer = () => {
   const BASE_URL = "https://giveawayfootball.codistan.org";
   
   const getGameAttemptData = async (id) => {
-    
-   
-      const url = `${BASE_URL}/api/game/getGameAttemptData?id=${encodeURIComponent(
-        id
-      )}`;
-      try {
-        const response = await fetch(url, {
-          method: "GET",
-        });
+    const url = `${BASE_URL}/api/game/getGameAttemptData?id=${encodeURIComponent(
+      id
+    )}`;
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+      });
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        const initialPlusSigns = data.data.attempts_array
-          ?.filter(
-            (attempt) => attempt.coordinates && attempt.coordinates.length === 2
-          )
-          ?.map((attempt) => ({
-            x: parseFloat(attempt?.coordinates[0]),
-            y: parseFloat(attempt?.coordinates[1]),
-            item_id: attempt.item_id,
-            color: "blue",
-          }));
-        setPlusSigns(initialPlusSigns);
-        return initialPlusSigns;
-      } catch (error) {
-        console.error("There was a problem with the fetch operation:", error);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    
+
+      const data = await response.json();
+      const initialPlusSigns = data.data.attempts_array
+        ?.filter(
+          (attempt) => attempt.coordinates && attempt.coordinates.length === 2
+        )
+        ?.map((attempt) => ({
+          x: parseFloat(attempt?.coordinates[0]),
+          y: parseFloat(attempt?.coordinates[1]),
+          item_id: attempt.item_id,
+          color: "blue",
+        }));
+      setPlusSigns(initialPlusSigns);
+      return initialPlusSigns;
+    } catch (error) {
+      console.error("There was a problem with the fetch operation:", error);
+    }
   };
 
   const [windowDimensions, setWindowDimensions] = useState({
@@ -225,12 +222,8 @@ const SpotBallContainer = () => {
         setMarkerId(event.data.idForMarkers);
       }
       if (event.data.deletedMarker) {
-        console.log("event.data.deletedMarker: ", event.data);
-
         const set = await getGameAttemptData(event.data?._id);
-        console.log("plus+++++++++++", plusSigns);
         if (set) {
-          console.log("set: ", set);
           setPlusSigns((prevSigns) =>
             prevSigns.filter(
               (item) => item.item_id !== event.data.deletedMarker
@@ -240,7 +233,6 @@ const SpotBallContainer = () => {
       }
 
       if (event.data.replayIndex) {
-        console.log('event.data: ', event.data);
         setReplay(event.data.replayIndex);
         const set = await getGameAttemptData(event.data?._id);
         if (set) {
@@ -360,10 +352,69 @@ const SpotBallContainer = () => {
                   width={imageDimensions.width * magnifierScale}
                   height={imageDimensions.height * magnifierScale}
                 />
+                {/* Render lines inside the magnifier */}
+                {showLines &&
+                  lines.map((line, i) => (
+                    <Line
+                      key={i}
+                      points={line.points.map((point, index) =>
+                        index % 2 === 0
+                          ? (point - magnifierPosition.x) * magnifierScale + magnifierSize / 2
+                          : (point - magnifierPosition.y) * magnifierScale + magnifierSize / 2
+                      )}
+                      stroke="black"
+                      strokeWidth={1}
+                      lineCap="round"
+                      lineJoin="round"
+                    />
+                  ))}
+                {/* Render markers inside the magnifier */}
+                {plusSigns.map((plusSign, index) => (
+                  <Group key={index}>
+                    <Line
+                      points={[
+                        (plusSign.x - magnifierPosition.x) * magnifierScale +
+                          magnifierSize / 2 - 10,
+                        (plusSign.y - magnifierPosition.y) * magnifierScale +
+                          magnifierSize / 2,
+                        (plusSign.x - magnifierPosition.x) * magnifierScale +
+                          magnifierSize / 2 + 10,
+                        (plusSign.y - magnifierPosition.y) * magnifierScale +
+                          magnifierSize / 2,
+                      ]}
+                      stroke="white"
+                      strokeWidth={2}
+                      lineCap="round"
+                      shadowColor="black"
+                      shadowBlur={2}
+                      shadowOpacity={1}
+                      shadowOffset={{ x: 0, y: 0 }}
+                    />
+                    <Line
+                      points={[
+                        (plusSign.x - magnifierPosition.x) * magnifierScale +
+                          magnifierSize / 2,
+                        (plusSign.y - magnifierPosition.y) * magnifierScale +
+                          magnifierSize / 2 - 10,
+                        (plusSign.x - magnifierPosition.x) * magnifierScale +
+                          magnifierSize / 2,
+                        (plusSign.y - magnifierPosition.y) * magnifierScale +
+                          magnifierSize / 2 + 10,
+                      ]}
+                      stroke="white"
+                      strokeWidth={2}
+                      lineCap="round"
+                      shadowColor="black"
+                      shadowBlur={2}
+                      shadowOpacity={1}
+                      shadowOffset={{ x: 0, y: 0 }}
+                    />
+                  </Group>
+                ))}
               </Group>
             )}
 
-            <Group
+<Group
               x={cursorPosition.x - magnifierSize / 2}
               y={cursorPosition.y - magnifierSize / 2}
             >
