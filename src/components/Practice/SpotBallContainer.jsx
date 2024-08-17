@@ -71,7 +71,9 @@ const SpotBallContainer = () => {
   const { lines, setLines, showLines, tool } = useContext(GameContext);
   const [startPoint, setStartPoint] = useState(null);
   const [endPoint, setEndPoint] = useState(null);
-  const [image] = useImage("Test Image 1.png");
+  const [image] = useImage(
+    "https://www.botb.com/umbraco/botb/spottheball/getcompetitionpicture/?competitionpictureguid=6ad56c28-48d6-40d5-894c-595a027cd51b&size=full&1723727413135"
+  );
   const [imageDimensions, setImageDimensions] = useState({
     width: 0,
     height: 0,
