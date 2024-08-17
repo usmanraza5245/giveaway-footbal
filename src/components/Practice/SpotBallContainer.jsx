@@ -259,10 +259,11 @@ const SpotBallContainer = () => {
 
   useEffect(() => {
     async function handleReplay(event) {
+      console.log("event origin", event.origin);
       if (
         event.origin !== "https://dreamdrive.co.za" &&
         event.origin !== "http://localhost:5173" &&
-        event.origin !== "https://hw-dream-drive-test-store.myshopify.com/"
+        event.origin !== "https://hw-dream-drive-test-store.myshopify.com"
       ) {
         return;
       }
