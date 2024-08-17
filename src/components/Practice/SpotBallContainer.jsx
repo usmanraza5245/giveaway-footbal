@@ -120,6 +120,18 @@ const SpotBallContainer = () => {
       setEndPoint(clampedPos);
     } else {
       const newPlusSigns = [...plusSigns, { ...clampedPos, color: "blue" }];
+      const image = e.target.getLayer().findOne("Image");
+      let image_coordinates = {
+        imageX: 0,
+        imageY: 0,
+      };
+      if (image) {
+        const { imageX, imageY } = getImageRealCoordinates(image, pos);
+        image_coordinates = {
+          imageX,
+          imageY,
+        };
+      }
       setPlusSigns(newPlusSigns);
       localStorage.setItem(`x_${plusSigns.length}`, clampedPos.x);
       localStorage.setItem(`y_${plusSigns.length}`, clampedPos.y);
@@ -130,6 +142,7 @@ const SpotBallContainer = () => {
             x: clampedPos.x.toFixed(0),
             y: clampedPos.y.toFixed(0),
           },
+          image_coordinates: image_coordinates,
           index: replay ? replay : newPlusSigns.length - 1,
         },
         "*"
@@ -144,42 +157,16 @@ const SpotBallContainer = () => {
     const image = e.target.getLayer().findOne("Image");
 
     if (image) {
-      // Get the bounding box of the image on the canvas
-      const imagePosition = image.getClientRect();
-
-      // Get the scale factor of the image on the canvas
-      const scaleX = image.scaleX();
-      const scaleY = image.scaleY();
-
-      // Calculate the position of the mouse relative to the image
-      const relativeX = (pos.x - imagePosition.x) / scaleX;
-      const relativeY = (pos.y - imagePosition.y) / scaleY;
-
-      // Original image dimensions (4K)
-      const originalImageWidth = imageCoordinates.width; // 4K width
-      const originalImageHeight = imageCoordinates.height; // 4K height
-
-      // Convert to the original 4K image coordinates
-      const imageX = (relativeX / image.width()) * originalImageWidth;
-      const imageY = (relativeY / image.height()) * originalImageHeight;
-
-      // console.log("Image Coordinates relative to the original image:", {
-      //   imageX,
-      //   imageY,
-      // });
-
       pos = {
         ...pos,
-        imageX,
-        imageY,
+        ...getImageRealCoordinates(image, pos),
       };
     }
-
     const clampedPos = {
-      x: Math.max(pos.x, 0),
-      y: Math.max(pos.y, 0),
-      imageX: Math.max(pos.imageX, 0),
-      imageY: Math.max(pos.imageY, 0),
+      x: Math.max(pos.x, 0) || 0,
+      y: Math.max(pos.y, 0) || 0,
+      imageX: Math.max(pos.imageX, 0) || 0,
+      imageY: Math.max(pos.imageY, 0) || 0,
     };
 
     setMagnifierPosition(clampedPos);
@@ -199,6 +186,31 @@ const SpotBallContainer = () => {
     setCursorPosition(clampedPos);
   };
 
+  const getImageRealCoordinates = (image, pos) => {
+    // Get the bounding box of the image on the canvas
+    const imagePosition = image.getClientRect();
+
+    // Get the scale factor of the image on the canvas
+    const scaleX = image.scaleX();
+    const scaleY = image.scaleY();
+
+    // Calculate the position of the mouse relative to the image
+    const relativeX = (pos.x - imagePosition.x) / scaleX;
+    const relativeY = (pos.y - imagePosition.y) / scaleY;
+
+    // Original image dimensions (4K)
+    const originalImageWidth = imageCoordinates.width; // 4K width
+    const originalImageHeight = imageCoordinates.height; // 4K height
+
+    // Convert to the original 4K image coordinates
+    const imageX = (relativeX / image.width()) * originalImageWidth;
+    const imageY = (relativeY / image.height()) * originalImageHeight;
+
+    return {
+      imageX: imageX.toFixed(0),
+      imageY: imageY.toFixed(0),
+    };
+  };
   const handleMouseUp = () => {
     if (startPoint && endPoint) {
       const fullLine = getFullLine(startPoint, endPoint);
@@ -518,9 +530,9 @@ const SpotBallContainer = () => {
             <Text
               x={getCoordinatesPosition().x}
               y={getCoordinatesPosition().y}
-              text={`x: ${Math.floor(cursorPosition.imageX)}    y: ${Math.floor(
-                cursorPosition.imageY
-              )}`}
+              text={`x: ${Math.floor(cursorPosition.imageX) || 0}    y: ${
+                Math.floor(cursorPosition.imageY) || 0
+              }`}
               fontSize={16}
               fill="white"
               stroke="black"
