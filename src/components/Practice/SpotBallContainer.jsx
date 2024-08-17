@@ -13,7 +13,7 @@ import { GameContext } from "../../context/Context";
 
 const SpotBallContainer = () => {
   const BASE_URL = "https://giveawayfootball.codistan.org";
-  
+
   const getGameAttemptData = async (id) => {
     const url = `${BASE_URL}/api/game/getGameAttemptData?id=${encodeURIComponent(
       id
@@ -71,8 +71,15 @@ const SpotBallContainer = () => {
   const { lines, setLines, showLines, tool } = useContext(GameContext);
   const [startPoint, setStartPoint] = useState(null);
   const [endPoint, setEndPoint] = useState(null);
-  const [image] = useImage("Test Image 1.png");
+  const [image] = useImage(
+    "https://www.botb.com/umbraco/botb/spottheball/getcompetitionpicture/?competitionpictureguid=6ad56c28-48d6-40d5-894c-595a027cd51b&size=full&1723727413135"
+  );
   const [imageDimensions, setImageDimensions] = useState({
+    width: 0,
+    height: 0,
+  });
+
+  const [imageCoordinates, setImageCoordinates] = useState({
     width: 0,
     height: 0,
   });
@@ -82,7 +89,7 @@ const SpotBallContainer = () => {
   const [markerId, setMarkerId] = useState(null);
 
   useEffect(() => {
-    if(markerId){
+    if (markerId) {
       getGameAttemptData(markerId);
     }
   }, [markerId]);
@@ -93,7 +100,10 @@ const SpotBallContainer = () => {
       const aspectRatio = image.width / image.height;
       const width = canvasWidth;
       const height = windowDimensions?.height;
-
+      setImageCoordinates({
+        width: image.width,
+        height: image.height,
+      });
       setImageDimensions({ width, height });
     }
   }, [image, windowDimensions?.width]);
@@ -128,10 +138,48 @@ const SpotBallContainer = () => {
   };
 
   const handleMouseMove = (e) => {
-    const pos = e.target.getStage().getPointerPosition();
+    let pos = e.target.getStage().getPointerPosition();
+
+    // Assuming you're using Konva.js, get the image node from the layer
+    const image = e.target.getLayer().findOne("Image");
+
+    if (image) {
+      // Get the bounding box of the image on the canvas
+      const imagePosition = image.getClientRect();
+
+      // Get the scale factor of the image on the canvas
+      const scaleX = image.scaleX();
+      const scaleY = image.scaleY();
+
+      // Calculate the position of the mouse relative to the image
+      const relativeX = (pos.x - imagePosition.x) / scaleX;
+      const relativeY = (pos.y - imagePosition.y) / scaleY;
+
+      // Original image dimensions (4K)
+      const originalImageWidth = imageCoordinates.width; // 4K width
+      const originalImageHeight = imageCoordinates.height; // 4K height
+
+      // Convert to the original 4K image coordinates
+      const imageX = (relativeX / image.width()) * originalImageWidth;
+      const imageY = (relativeY / image.height()) * originalImageHeight;
+
+      // console.log("Image Coordinates relative to the original image:", {
+      //   imageX,
+      //   imageY,
+      // });
+
+      pos = {
+        ...pos,
+        imageX,
+        imageY,
+      };
+    }
+
     const clampedPos = {
-      x: Math.max(pos.x , 0),
-      y: Math.max(pos.y , 0),
+      x: Math.max(pos.x, 0),
+      y: Math.max(pos.y, 0),
+      imageX: Math.max(pos.imageX, 0),
+      imageY: Math.max(pos.imageY, 0),
     };
 
     setMagnifierPosition(clampedPos);
@@ -215,8 +263,6 @@ const SpotBallContainer = () => {
         event.origin !== "https://dreamdrive.co.za" &&
         event.origin !== "http://localhost:5173"
       ) {
-      
-
         return;
       }
       if (event.data.idForMarkers) {
@@ -234,10 +280,10 @@ const SpotBallContainer = () => {
       }
 
       if (event.data.replayId) {
-        console.log("handle replay" , event.data)
+        console.log("handle replay", event.data);
         setReplay(event.data.replayIndex);
         const set = await getGameAttemptData(event.data?._id);
-        console.log('set: ------- ', set);
+        console.log("set: ------- ", set);
         if (set) {
           setPlusSigns((prevSigns) =>
             prevSigns.filter((item) => item.item_id !== event.data.replayId)
@@ -363,8 +409,10 @@ const SpotBallContainer = () => {
                       key={i}
                       points={line.points.map((point, index) =>
                         index % 2 === 0
-                          ? (point - magnifierPosition.x) * magnifierScale + magnifierSize / 2
-                          : (point - magnifierPosition.y) * magnifierScale + magnifierSize / 2
+                          ? (point - magnifierPosition.x) * magnifierScale +
+                            magnifierSize / 2
+                          : (point - magnifierPosition.y) * magnifierScale +
+                            magnifierSize / 2
                       )}
                       stroke="black"
                       strokeWidth={1}
@@ -378,11 +426,13 @@ const SpotBallContainer = () => {
                     <Line
                       points={[
                         (plusSign.x - magnifierPosition.x) * magnifierScale +
-                          magnifierSize / 2 - 10,
+                          magnifierSize / 2 -
+                          10,
                         (plusSign.y - magnifierPosition.y) * magnifierScale +
                           magnifierSize / 2,
                         (plusSign.x - magnifierPosition.x) * magnifierScale +
-                          magnifierSize / 2 + 10,
+                          magnifierSize / 2 +
+                          10,
                         (plusSign.y - magnifierPosition.y) * magnifierScale +
                           magnifierSize / 2,
                       ]}
@@ -399,11 +449,13 @@ const SpotBallContainer = () => {
                         (plusSign.x - magnifierPosition.x) * magnifierScale +
                           magnifierSize / 2,
                         (plusSign.y - magnifierPosition.y) * magnifierScale +
-                          magnifierSize / 2 - 10,
+                          magnifierSize / 2 -
+                          10,
                         (plusSign.x - magnifierPosition.x) * magnifierScale +
                           magnifierSize / 2,
                         (plusSign.y - magnifierPosition.y) * magnifierScale +
-                          magnifierSize / 2 + 10,
+                          magnifierSize / 2 +
+                          10,
                       ]}
                       stroke="white"
                       strokeWidth={2}
@@ -418,7 +470,7 @@ const SpotBallContainer = () => {
               </Group>
             )}
 
-<Group
+            <Group
               x={cursorPosition.x - magnifierSize / 2}
               y={cursorPosition.y - magnifierSize / 2}
             >
@@ -464,8 +516,8 @@ const SpotBallContainer = () => {
             <Text
               x={getCoordinatesPosition().x}
               y={getCoordinatesPosition().y}
-              text={`x: ${Math.floor(cursorPosition.x)}    y: ${Math.floor(
-                cursorPosition.y
+              text={`x: ${Math.floor(cursorPosition.imageX)}    y: ${Math.floor(
+                cursorPosition.imageY
               )}`}
               fontSize={16}
               fill="white"
