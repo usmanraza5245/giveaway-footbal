@@ -78,6 +78,11 @@ const SpotBallContainer = () => {
     width: 0,
     height: 0,
   });
+
+  const [imageCoordinates, setImageCoordinates] = useState({
+    width: 0,
+    height: 0,
+  });
   const [magnifierPosition, setMagnifierPosition] = useState({ x: 0, y: 0 });
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
   const [plusSigns, setPlusSigns] = useState([]);
@@ -95,7 +100,10 @@ const SpotBallContainer = () => {
       const aspectRatio = image.width / image.height;
       const width = canvasWidth;
       const height = windowDimensions?.height;
-
+      setImageCoordinates({
+        width: image.width,
+        height: image.height,
+      });
       setImageDimensions({ width, height });
     }
   }, [image, windowDimensions?.width]);
@@ -130,10 +138,48 @@ const SpotBallContainer = () => {
   };
 
   const handleMouseMove = (e) => {
-    const pos = e.target.getStage().getPointerPosition();
+    let pos = e.target.getStage().getPointerPosition();
+
+    // Assuming you're using Konva.js, get the image node from the layer
+    const image = e.target.getLayer().findOne("Image");
+
+    if (image) {
+      // Get the bounding box of the image on the canvas
+      const imagePosition = image.getClientRect();
+
+      // Get the scale factor of the image on the canvas
+      const scaleX = image.scaleX();
+      const scaleY = image.scaleY();
+
+      // Calculate the position of the mouse relative to the image
+      const relativeX = (pos.x - imagePosition.x) / scaleX;
+      const relativeY = (pos.y - imagePosition.y) / scaleY;
+
+      // Original image dimensions (4K)
+      const originalImageWidth = imageCoordinates.width; // 4K width
+      const originalImageHeight = imageCoordinates.height; // 4K height
+
+      // Convert to the original 4K image coordinates
+      const imageX = (relativeX / image.width()) * originalImageWidth;
+      const imageY = (relativeY / image.height()) * originalImageHeight;
+
+      // console.log("Image Coordinates relative to the original image:", {
+      //   imageX,
+      //   imageY,
+      // });
+
+      pos = {
+        ...pos,
+        imageX,
+        imageY,
+      };
+    }
+
     const clampedPos = {
       x: Math.max(pos.x, 0),
       y: Math.max(pos.y, 0),
+      imageX: Math.max(pos.imageX, 0),
+      imageY: Math.max(pos.imageY, 0),
     };
 
     setMagnifierPosition(clampedPos);
@@ -215,7 +261,8 @@ const SpotBallContainer = () => {
     async function handleReplay(event) {
       if (
         event.origin !== "https://dreamdrive.co.za" &&
-        event.origin !== "http://localhost:5173"
+        event.origin !== "http://localhost:5173" &&
+        event.origin !== "https://hw-dream-drive-test-store.myshopify.com/"
       ) {
         return;
       }
@@ -470,8 +517,8 @@ const SpotBallContainer = () => {
             <Text
               x={getCoordinatesPosition().x}
               y={getCoordinatesPosition().y}
-              text={`x: ${Math.floor(cursorPosition.x)}    y: ${Math.floor(
-                cursorPosition.y
+              text={`x: ${Math.floor(cursorPosition.imageX)}    y: ${Math.floor(
+                cursorPosition.imageY
               )}`}
               fontSize={16}
               fill="white"
